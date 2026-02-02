@@ -1,0 +1,224 @@
+[
+    {
+        "name": "POST \/api\/login",
+        "request": {
+            "email": "user1@example.com",
+            "password": "password"
+        },
+        "response": {
+            "http_code": 200,
+            "body": "{\"token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NzAwMzIzNjQuOTIwNTk0LCJleHAiOjE3NzAwMzU5NjQuOTIwNTk0LCJ1c2VyX2lkIjoxLCJlbWFpbCI6InVzZXIxQGV4YW1wbGUuY29tIn0.sBQ_UOCkrQAIeB-S6Xd0DUaUE3-X589bcG6fC4__byg\",\"user\":{\"id\":1,\"name\":\"User One\",\"email\":\"user1@example.com\"}}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "GET \/api\/home",
+        "request": null,
+        "response": {
+            "http_code": 200,
+            "body": "{\"user\":{\"id\":1,\"name\":\"User One\",\"email\":\"user1@example.com\",\"lat\":\"40.71280000\",\"lng\":\"-74.00600000\",\"online\":true},\"nearby_users\":[{\"id\":2,\"name\":\"User Two\",\"distance\":0.01},{\"id\":3,\"name\":\"User Three\",\"distance\":0.03}]}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "GET \/api\/general",
+        "request": null,
+        "response": {
+            "http_code": 200,
+            "body": "{\"chat\":{\"id\":1,\"type\":\"general\",\"is_active\":true},\"messages\":[{\"id\":2,\"user_id\":2,\"user_name\":\"User Two\",\"text\":\"Hi there!\",\"created_at\":\"2026-02-02 12:29:58\"},{\"id\":1,\"user_id\":1,\"user_name\":\"User One\",\"text\":\"Hello everyone!\",\"created_at\":\"2026-02-02 12:29:58\"}]}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "GET \/api\/usuarios",
+        "request": null,
+        "response": {
+            "http_code": 200,
+            "body": "{\"users\":[{\"id\":1,\"name\":\"User One\",\"email\":\"user1@example.com\"},{\"id\":2,\"name\":\"User Two\",\"email\":\"user2@example.com\"},{\"id\":3,\"name\":\"User Three\",\"email\":\"user3@example.com\"},{\"id\":4,\"name\":\"User Four\",\"email\":\"user4@example.com\"}]}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "GET \/api\/usuarios\/1",
+        "request": null,
+        "response": {
+            "http_code": 200,
+            "body": "{\"id\":1,\"name\":\"User One\",\"email\":\"user1@example.com\",\"lat\":\"40.71280000\",\"lng\":\"-74.00600000\",\"online\":true}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "POST \/api\/usuarios",
+        "request": {
+            "name": "Test User",
+            "email": "testuser_for_script@example.com",
+            "password": "pwd"
+        },
+        "response": {
+            "http_code": 201,
+            "body": "{\"message\":\"User created\",\"user\":{\"id\":5,\"name\":\"Test User\",\"email\":\"testuser_for_script@example.com\"}}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "PUT \/api\/usuarios\/1",
+        "request": {
+            "name": "User One Updated From Script"
+        },
+        "response": {
+            "http_code": 200,
+            "body": "{\"message\":\"User updated\"}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "POST \/api\/mensaje?chat_id=1",
+        "request": {
+            "text": "Script test message"
+        },
+        "response": {
+            "http_code": 200,
+            "body": "{\"message\":\"Message sent\",\"id\":4}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "GET \/api\/mensaje?chat_id=1",
+        "request": null,
+        "response": {
+            "http_code": 200,
+            "body": "{\"messages\":[{\"id\":2,\"user_id\":2,\"user_name\":\"User Two\",\"text\":\"Hi there!\",\"created_at\":\"2026-02-02 12:29:58\"},{\"id\":1,\"user_id\":1,\"user_name\":\"User One Updated From Script\",\"text\":\"Hello everyone!\",\"created_at\":\"2026-02-02 12:29:58\"},{\"id\":4,\"user_id\":1,\"user_name\":\"User One Updated From Script\",\"text\":\"Script test message\",\"created_at\":\"2026-02-02 12:39:29\"}]}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "POST \/api\/seguir",
+        "request": {
+            "user_id": 2
+        },
+        "response": {
+            "http_code": 200,
+            "body": "{\"message\":\"Already following\"}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "GET \/api\/seguidos",
+        "request": null,
+        "response": {
+            "http_code": 200,
+            "body": "{\"followed_users\":[{\"id\":2,\"name\":\"User Two\",\"email\":\"user2@example.com\"}]}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "POST \/api\/bloquear",
+        "request": {
+            "user_id": 4
+        },
+        "response": {
+            "http_code": 201,
+            "body": "{\"message\":\"User blocked\"}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "GET \/api\/bloqueados",
+        "request": null,
+        "response": {
+            "http_code": 200,
+            "body": "{\"blocked_users\":[{\"id\":4,\"name\":\"User Four\",\"email\":\"user4@example.com\"}]}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "POST \/api\/invitar",
+        "request": {
+            "user_id": 2
+        },
+        "response": {
+            "http_code": 200,
+            "body": "{\"message\":\"Chat already exists\",\"chat\":{\"id\":2,\"type\":\"private\",\"is_active\":true}}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "GET \/api\/privado",
+        "request": null,
+        "response": {
+            "http_code": 200,
+            "body": "{\"chats\":[{\"id\":2,\"type\":\"private\",\"is_active\":true,\"other_user\":{\"id\":2,\"name\":\"User Two\"}}]}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "POST \/api\/actualizar",
+        "request": {
+            "lat": 40.7128,
+            "lng": -74.006
+        },
+        "response": {
+            "http_code": 200,
+            "body": "{\"message\":\"Location updated\"}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "GET \/api\/perfil",
+        "request": null,
+        "response": {
+            "http_code": 200,
+            "body": "{\"id\":1,\"name\":\"User One Updated From Script\",\"email\":\"user1@example.com\",\"lat\":\"40.71280000\",\"lng\":\"-74.00600000\",\"online\":true}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "POST \/api\/amistad\/solicitar",
+        "request": {
+            "user_id": 4
+        },
+        "response": {
+            "http_code": 201,
+            "body": "{\"message\":\"Friend request sent\",\"request_id\":3}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "GET \/api\/amistad\/pendientes",
+        "request": null,
+        "response": {
+            "http_code": 200,
+            "body": "{\"pending_requests\":[]}",
+            "errno": 0,
+            "error": ""
+        }
+    },
+    {
+        "name": "POST \/api\/logout",
+        "request": {},
+        "response": {
+            "http_code": 200,
+            "body": "{\"message\":\"Logged out\"}",
+            "errno": 0,
+            "error": ""
+        }
+    }
+]

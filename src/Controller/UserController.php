@@ -74,7 +74,7 @@ class UserController extends AbstractController
         ], 201);
     }
 
-    #[Route('/api/usuarios/{id}', name: 'api_usuarios_show', methods: ['GET'])]
+    #[Route('/api/usuarios/{id}', name: 'api_usuarios_show', methods: ['GET'], requirements: ['id' => '\\d+'])]
     public function show(
         int $id,
         Request $request,
@@ -101,7 +101,7 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/api/usuarios/{id}', name: 'api_usuarios_update', methods: ['PUT'])]
+    #[Route('/api/usuarios/{id}', name: 'api_usuarios_update', methods: ['PUT'], requirements: ['id' => '\\d+'])]
     public function update(
         int $id,
         Request $request,
@@ -152,6 +152,34 @@ class UserController extends AbstractController
         $em->flush();
 
         return new JsonResponse(['message' => 'User deleted']);
+    }
+
+    #[Route('/api/usuarios/locations', name: 'api_usuarios_locations', methods: ['GET'])]
+    public function locations(
+        Request $request,
+        EntityManagerInterface $em,
+        JwtService $jwtService
+    ): JsonResponse {
+        $token = $this->getTokenFromRequest($request, $jwtService);
+        if (!$token) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $users = $em->getRepository(User::class)->findAll();
+        $data = [];
+        foreach ($users as $user) {
+            if ($user->getLat() && $user->getLng()) {
+                $data[] = [
+                    'id' => $user->getId(),
+                    'name' => $user->getName(),
+                    'lat' => $user->getLat(),
+                    'lng' => $user->getLng(),
+                    'online' => $user->isOnline(),
+                ];
+            }
+        }
+
+        return new JsonResponse(['users' => $data]);
     }
 
     private function getTokenFromRequest(Request $request, JwtService $jwtService): ?array

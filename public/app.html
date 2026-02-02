@@ -404,6 +404,14 @@
             margin-bottom: 15px;
         }
 
+        /* Map container */
+        #map {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
         .location-input input {
             flex: 1;
             padding: 8px;
@@ -580,7 +588,8 @@
                         </div>
 
                         <h3 style="margin-top: 20px;">👥 Usuarios Cercanos (< 5 km)</h3>
-                        <div id="nearbyUsers"></div>
+                        <div id="map"></div>
+                        <div id="nearbyUsers"></div> 
                     </div>
 
                     <!-- GENERAL CHAT SECTION -->
@@ -630,8 +639,129 @@
     <script>
         const API_URL = 'http://127.0.0.1:8000/api';
         const API_KEY = 'test-api-key';
+        let GMAP_API_KEY = null;
+
         let token = null;
         let currentUser = null;
+
+        // Google Maps related
+        let map = null;
+        let markers = [];
+        let infoWindow = null;
+
+        async function fetchConfig() {
+            try {
+                const resp = await fetch(`${API_URL}/config`, { headers: { 'X-API-KEY': API_KEY } });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                if (data.gmap_api_key) {
+                    GMAP_API_KEY = data.gmap_api_key;
+                    loadGoogleMaps();
+                }
+            } catch (e) {
+                console.warn('Error fetching config', e);
+            }
+        }
+
+        function loadGoogleMaps() {
+            if (!GMAP_API_KEY) {
+                console.warn('Google Maps API key not set. Map will not load.');
+                return;
+            }
+            console.log('Loading Google Maps with key:', GMAP_API_KEY);
+            if (window.google && window.google.maps) {
+                console.log('Google Maps already loaded, initializing map');
+                initMap();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${GMAP_API_KEY}&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            script.onload = () => { console.log('Google Maps script loaded'); };
+            script.onerror = (e) => {
+                console.error('Failed to load Google Maps script', e);
+                const mapEl = document.getElementById('map');
+                if (mapEl) mapEl.innerHTML = '<div style="color:#ff6b6b;padding:20px;">No se pudo cargar Google Maps. Comprueba la clave y las restricciones de la API (ver consola).</div>';
+            };
+            document.head.appendChild(script);
+        }
+
+        function initMap() {
+            const center = currentUser && currentUser.lat && currentUser.lng ? { lat: parseFloat(currentUser.lat), lng: parseFloat(currentUser.lng) } : { lat: 0, lng: 0 };
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: currentUser ? 12 : 2,
+                center
+            });
+            infoWindow = new google.maps.InfoWindow();
+            updateMapMarkers();
+        }
+
+        function clearMarkers() {
+            markers.forEach(m => m.setMap(null));
+            markers = [];
+        }
+
+        function computeBearing(lat1, lon1, lat2, lon2) {
+            const toRad = deg => deg * Math.PI / 180;
+            const toDeg = rad => rad * 180 / Math.PI;
+            const φ1 = toRad(lat1), φ2 = toRad(lat2);
+            const λ1 = toRad(lon1), λ2 = toRad(lon2);
+            const y = Math.sin(λ2-λ1) * Math.cos(φ2);
+            const x = Math.cos(φ1)*Math.sin(φ2) - Math.sin(φ1)*Math.cos(φ2)*Math.cos(λ2-λ1);
+            const θ = Math.atan2(y, x);
+            return (toDeg(θ) + 360) % 360;
+        }
+
+        async function updateMapMarkers() {
+            if (!map) {
+                // Try to load maps if not ready
+                loadGoogleMaps();
+                return;
+            }
+            if (!token) return;
+            try {
+                const resp = await fetch(`${API_URL}/usuarios/locations`, { headers: { 'X-API-KEY': API_KEY, 'Authorization': `Bearer ${token}` } });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const users = data.users || [];
+                clearMarkers();
+                const bounds = new google.maps.LatLngBounds();
+                for (const ud of users) {
+                    const lat = parseFloat(ud.lat), lng = parseFloat(ud.lng);
+                    const bearing = currentUser && currentUser.lat ? computeBearing(parseFloat(currentUser.lat), parseFloat(currentUser.lng), lat, lng) : 0;
+                    const marker = new google.maps.Marker({
+                        position: { lat, lng },
+                        map,
+                        title: ud.name,
+                        icon: {
+                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                            scale: 5,
+                            rotation: bearing,
+                            fillColor: '#ff5722',
+                            fillOpacity: 0.9,
+                            strokeWeight: 1,
+                            strokeColor: '#000'
+                        }
+                    });
+                    marker.addListener('click', () => {
+                        infoWindow.setContent(`<div><strong>${ud.name}</strong><br>Lat: ${lat}, Lng: ${lng}</div>`);
+                        infoWindow.open(map, marker);
+                    });
+                    markers.push(marker);
+                    bounds.extend(marker.getPosition());
+                }
+
+                if (currentUser && currentUser.lat && currentUser.lng) {
+                    map.setCenter({ lat: parseFloat(currentUser.lat), lng: parseFloat(currentUser.lng) });
+                    map.setZoom(12);
+                } else if (!bounds.isEmpty) {
+                    map.fitBounds(bounds);
+                }
+            } catch (e) {
+                console.error('Error updating map markers', e);
+            }
+        }
 
         console.log('API_URL:', API_URL);
 
@@ -742,6 +872,9 @@
 
             document.getElementById('sidebarName').textContent = currentUser.name;
             document.getElementById('sidebarEmail').textContent = currentUser.email;
+
+            // Fetch config (API key) and load Google Maps when ready
+            fetchConfig();
         }
 
         function switchSection(section) {
@@ -820,6 +953,8 @@
                 `).join('');
 
                 document.getElementById('nearbyUsers').innerHTML = html || '<div class="empty-state"><p>No hay usuarios cercanos</p></div>';
+                // Update markers on the map
+                try { updateMapMarkers(); } catch(e) { console.warn('Map update skipped', e); }
             } catch (error) {
                 console.error(error);
                 document.getElementById('nearbyUsers').innerHTML = '<div class="empty-state"><p>Error al cargar usuarios</p></div>';
