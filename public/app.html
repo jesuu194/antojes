@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antojes - Chat Geolocalizado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        /* LOGIN SCREEN */
+        .login-screen {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .login-screen.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .login-screen h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-success {
+            background: #51cf66;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffd43b;
+            color: #333;
+        }
+
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+            padding: 10px;
+            background: #ffe0e0;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        /* DASHBOARD */
+        .dashboard {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            height: 90vh;
+            display: flex;
+        }
+
+        .dashboard.active {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #ddd;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            opacity: 0.8;
+            margin: 5px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 25px;
+        }
+
+        .nav-section h4 {
+            font-size: 12px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+
+        .nav-button {
+            width: 100%;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-align: left;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .nav-button:hover,
+        .nav-button.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            color: #333;
+            margin: 0;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-distance {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .messages-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .message {
+            background: white;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: #333;
+            font-size: 12px;
+        }
+
+        .message-text {
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .message-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .message-input button {
+            padding: 10px 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge-online {
+            background: #51cf66;
+            color: white;
+        }
+
+        .badge-offline {
+            background: #999;
+            color: white;
+        }
+
+        .badge-distance {
+            background: #667eea;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .btn-logout {
+            width: 100%;
+            margin-top: auto;
+            padding: 10px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #ff5252;
+        }
+
+        .location-info {
+            background: #e7f5ff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #1971c2;
+            margin-bottom: 15px;
+        }
+
+        .location-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .location-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .location-input button {
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .status.active {
+            display: block;
+        }
+
+        .status-success {
+            background: #d3f9d8;
+            color: #2f9e44;
+            border: 1px solid #51cf66;
+        }
+
+        .status-error {
+            background: #ffe0e0;
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .request-item {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ffc107;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LOGIN SCREEN -->
+        <div class="login-screen active" id="loginScreen">
+            <h1>🌍 Antojes</h1>
+            <p style="color: #999; margin-bottom: 30px;">Chat Geolocalizado</p>
+            
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="user1@example.com" value="user1@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword">Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="password" value="password">
+            </div>
+            
+            <button class="btn btn-primary" onclick="login()">Login</button>
+            <button class="btn btn-secondary" onclick="toggleSignup()">Crear cuenta</button>
+            
+            <div class="error" id="loginError"></div>
+        </div>
+
+        <!-- SIGNUP SCREEN -->
+        <div class="login-screen" id="signupScreen">
+            <h1>Crear Cuenta</h1>
+            
+            <div class="form-group">
+                <label for="signupName">Nombre</label>
+                <input type="text" id="signupName" placeholder="Tu nombre">
+            </div>
+            
+            <div class="form-group">
+                <label for="signupEmail">Email</label>
+                <input type="email" id="signupEmail" placeholder="tu@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="signupPassword">Contraseña</label>
+                <input type="password" id="signupPassword" placeholder="password">
+            </div>
+            
+            <button class="btn btn-primary" onclick="signup()">Registrarse</button>
+            <button class="btn btn-secondary" onclick="toggleSignup()">Volver al login</button>
+            
+            <div class="error" id="signupError"></div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div class="dashboard" id="dashboard">
+            <div class="sidebar">
+                <div class="user-info">
+                    <h3 id="sidebarName">Usuario</h3>
+                    <p id="sidebarEmail">email@example.com</p>
+                    <p id="sidebarLocation">📍 Ubicación</p>
+                </div>
+
+                <div class="nav-section">
+                    <h4>Principal</h4>
+                    <button class="nav-button active" onclick="switchSection('home')">🏠 Home</button>
+                    <button class="nav-button" onclick="switchSection('general')">💬 Chat General</button>
+                </div>
+
+                <div class="nav-section">
+                    <h4>Privado</h4>
+                    <button class="nav-button" onclick="switchSection('private')">🔒 Chats Privados</button>
+                </div>
+
+                <div class="nav-section">
+                    <h4>Social</h4>
+                    <button class="nav-button" onclick="switchSection('block')">🚫 Bloqueados</button>
+                    <button class="nav-button" onclick="switchSection('follow')">👤 Seguidos</button>
+                    <button class="nav-button" onclick="switchSection('friendship')">🤝 Amistades</button>
+                </div>
+
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="main-content">
+                <div class="header">
+                    <h2 id="sectionTitle">Home</h2>
+                    <div id="headerActions"></div>
+                </div>
+
+                <div class="content">
+                    <!-- HOME SECTION -->
+                    <div class="section active" id="homeSection">
+                        <div class="location-info">
+                            📍 Ubicación: <span id="currentLocation">Cargando...</span>
+                        </div>
+
+                        <div class="location-input">
+                            <input type="number" id="newLat" placeholder="Latitud" step="0.0001">
+                            <input type="number" id="newLng" placeholder="Longitud" step="0.0001">
+                            <button class="btn btn-primary btn-small" onclick="updateLocation()">Actualizar</button>
+                        </div>
+
+                        <h3 style="margin-top: 20px;">👥 Usuarios Cercanos (< 5 km)</h3>
+                        <div id="nearbyUsers"></div>
+                    </div>
+
+                    <!-- GENERAL CHAT SECTION -->
+                    <div class="section" id="generalSection">
+                        <h3>💬 Chat General</h3>
+                        <p style="color: #999; font-size: 12px; margin-bottom: 15px;">Chat público accesible para todos</p>
+                        
+                        <div class="messages-container" id="generalMessages"></div>
+                        
+                        <div class="message-input">
+                            <input type="text" id="generalMessageInput" placeholder="Escribe tu mensaje...">
+                            <button class="btn btn-primary btn-small" onclick="sendGeneralMessage()">Enviar</button>
+                        </div>
+                    </div>
+
+                    <!-- PRIVATE CHAT SECTION -->
+                    <div class="section" id="privateSection">
+                        <h3>🔒 Chats Privados</h3>
+                        <div id="privateChatsList"></div>
+                    </div>
+
+                    <!-- BLOCK SECTION -->
+                    <div class="section" id="blockSection">
+                        <h3>🚫 Usuarios Bloqueados</h3>
+                        <div id="blockedUsers"></div>
+                    </div>
+
+                    <!-- FOLLOW SECTION -->
+                    <div class="section" id="followSection">
+                        <h3>👤 Usuarios que Sigues</h3>
+                        <div id="followedUsers"></div>
+                    </div>
+
+                    <!-- FRIENDSHIP SECTION -->
+                    <div class="section" id="friendshipSection">
+                        <h3>🤝 Mis Amigos</h3>
+                        <div id="friendsList"></div>
+                        
+                        <h3 style="margin-top: 30px;">📬 Solicitudes Pendientes</h3>
+                        <div id="friendRequests"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/api';
+        const API_KEY = 'test-api-key';
+        let token = null;
+        let currentUser = null;
+
+        console.log('API_URL:', API_URL);
+
+        // =============== LOGIN & SIGNUP ===============
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showError('loginError', 'Por favor completa todos los campos');
+                return;
+            }
+
+            try {
+                console.log('Iniciando login con:', email);
+                const url = `${API_URL}/login`;
+                console.log('URL:', url);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data completa:', JSON.stringify(data, null, 2));
+                console.log('Token en respuesta:', data.token);
+                console.log('User en respuesta:', data.user);
+                console.log('Propiedades de data:', Object.keys(data));
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Credenciales inválidas');
+                }
+
+                if (!data.token || !data.user) {
+                    throw new Error('Token o usuario no encontrado en respuesta');
+                }
+
+                token = data.token;
+                currentUser = data.user;
+
+                console.log('Token guardado:', token);
+                console.log('Usuario guardado:', currentUser);
+
+                showDashboard();
+                loadHome();
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('loginError', error.message);
+            }
+        }
+
+        async function signup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            if (!name || !email || !password) {
+                showError('signupError', 'Por favor completa todos los campos');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/usuarios`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                if (!response.ok) throw new Error('Error al crear la cuenta');
+
+                showError('signupError', 'Cuenta creada. Ingresa con tus credenciales.', true);
+                document.getElementById('loginEmail').value = email;
+                document.getElementById('loginPassword').value = password;
+                toggleSignup();
+            } catch (error) {
+                showError('signupError', error.message);
+            }
+        }
+
+        function toggleSignup() {
+            document.getElementById('loginScreen').classList.toggle('active');
+            document.getElementById('signupScreen').classList.toggle('active');
+        }
+
+        function logout() {
+            if (confirm('¿Cerrar sesión?')) {
+                token = null;
+                currentUser = null;
+                document.getElementById('loginScreen').classList.add('active');
+                document.getElementById('dashboard').classList.remove('active');
+                document.getElementById('signupScreen').classList.remove('active');
+            }
+        }
+
+        // =============== DASHBOARD ===============
+        function showDashboard() {
+            document.getElementById('loginScreen').classList.remove('active');
+            document.getElementById('signupScreen').classList.remove('active');
+            document.getElementById('dashboard').classList.add('active');
+
+            document.getElementById('sidebarName').textContent = currentUser.name;
+            document.getElementById('sidebarEmail').textContent = currentUser.email;
+        }
+
+        function switchSection(section) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-button').forEach(el => el.classList.remove('active'));
+
+            const sectionMap = {
+                'home': { id: 'homeSection', title: '🏠 Home', load: loadHome },
+                'general': { id: 'generalSection', title: '💬 Chat General', load: loadGeneralChat },
+                'private': { id: 'privateSection', title: '🔒 Chats Privados', load: loadPrivateChats },
+                'block': { id: 'blockSection', title: '🚫 Bloqueados', load: loadBlockedUsers },
+                'follow': { id: 'followSection', title: '👤 Seguidos', load: loadFollowedUsers },
+                'friendship': { id: 'friendshipSection', title: '🤝 Amistades', load: loadFriendship }
+            };
+
+            const config = sectionMap[section];
+            document.getElementById(config.id).classList.add('active');
+            document.querySelector(`[onclick="switchSection('${section}')"]`).classList.add('active');
+            document.getElementById('sectionTitle').textContent = config.title;
+
+            if (config.load) config.load();
+        }
+
+        // =============== HOME ===============
+        async function loadHome() {
+            try {
+                console.log('loadHome - Token actual:', token);
+                console.log('loadHome - Usuario actual:', currentUser);
+
+                if (!token) {
+                    console.error('No hay token disponible');
+                    throw new Error('No hay sesión activa');
+                }
+
+                const response = await fetch(`${API_URL}/home`, {
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                console.log('loadHome response status:', response.status);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error('loadHome error:', error);
+                    throw new Error(error.error || 'Error al cargar home');
+                }
+
+                const data = await response.json();
+                console.log('loadHome data:', data);
+                currentUser = data.user;
+
+                document.getElementById('currentLocation').textContent = 
+                    `${data.user.lat || 'N/A'}, ${data.user.lng || 'N/A'}`;
+                document.getElementById('newLat').value = data.user.lat || '';
+                document.getElementById('newLng').value = data.user.lng || '';
+                document.getElementById('sidebarLocation').textContent = 
+                    `📍 ${data.user.lat || '?'}, ${data.user.lng || '?'}`;
+
+                const html = data.nearby_users.map(user => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">${user.name}</div>
+                                <span class="badge badge-distance">${user.distance} km</span>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-small" onclick="inviteToChat(${user.id})">💬 Chat</button>
+                                <button class="btn btn-success btn-small" onclick="followUser(${user.id})">👤 Seguir</button>
+                                <button class="btn btn-warning btn-small" onclick="sendFriendRequest(${user.id})">🤝 Amistad</button>
+                                <button class="btn btn-danger btn-small" onclick="blockUser(${user.id})">🚫 Bloquear</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('nearbyUsers').innerHTML = html || '<div class="empty-state"><p>No hay usuarios cercanos</p></div>';
+            } catch (error) {
+                console.error(error);
+                document.getElementById('nearbyUsers').innerHTML = '<div class="empty-state"><p>Error al cargar usuarios</p></div>';
+            }
+        }
+
+        async function updateLocation() {
+            const lat = document.getElementById('newLat').value;
+            const lng = document.getElementById('newLng').value;
+
+            if (!lat || !lng) {
+                alert('Por favor ingresa latitud y longitud');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/actualizar`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ lat, lng })
+                });
+
+                if (response.ok) {
+                    alert('Ubicación actualizada');
+                    loadHome();
+                }
+            } catch (error) {
+                alert('Error al actualizar ubicación');
+            }
+        }
+
+        // =============== GENERAL CHAT ===============
+        async function loadGeneralChat() {
+            try {
+                const response = await fetch(`${API_URL}/general`, {
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Error');
+
+                const data = await response.json();
+                const messagesHtml = data.messages.map(msg => `
+                    <div class="message">
+                        <div class="message-author">${msg.user_name}</div>
+                        <div class="message-text">${msg.text}</div>
+                        <div class="message-time">${msg.created_at}</div>
+                    </div>
+                `).join('');
+
+                document.getElementById('generalMessages').innerHTML = messagesHtml || '<p style="text-align:center;color:#999;">Sin mensajes</p>';
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function sendGeneralMessage() {
+            const text = document.getElementById('generalMessageInput').value.trim();
+            if (!text) return;
+
+            try {
+                const response = await fetch(`${API_URL}/mensaje?chat_id=1`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                if (response.ok) {
+                    document.getElementById('generalMessageInput').value = '';
+                    loadGeneralChat();
+                }
+            } catch (error) {
+                alert('Error al enviar mensaje');
+            }
+        }
+
+        // =============== PRIVATE CHATS ===============
+        async function loadPrivateChats() {
+            try {
+                const response = await fetch(`${API_URL}/privado`, {
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Error');
+
+                const data = await response.json();
+                const html = data.chats.map(chat => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">${chat.other_user ? chat.other_user.name : 'Chat'}</div>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-small" onclick="openPrivateChat(${chat.id})">Abrir</button>
+                                <button class="btn btn-danger btn-small" onclick="exitChat(${chat.id})">Salir</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('privateChatsList').innerHTML = html || '<div class="empty-state"><p>No tienes chats privados</p></div>';
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function inviteToChat(userId) {
+            try {
+                const response = await fetch(`${API_URL}/invitar`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                if (response.ok) {
+                    alert('Chat creado/abierto');
+                    loadPrivateChats();
+                }
+            } catch (error) {
+                alert('Error al crear chat');
+            }
+        }
+
+        async function openPrivateChat(chatId) {
+            try {
+                const response = await fetch(`${API_URL}/mensaje?chat_id=${chatId}`, {
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const messagesHtml = data.messages.map(msg => `
+                        <div class="message">
+                            <div class="message-author">${msg.user_name}</div>
+                            <div class="message-text">${msg.text}</div>
+                            <div class="message-time">${msg.created_at}</div>
+                        </div>
+                    `).join('');
+
+                    const messageInput = `
+                        <div style="margin-top:15px;">
+                            <div class="message-input">
+                                <input type="text" id="privChatInput" placeholder="Mensaje...">
+                                <button class="btn btn-primary btn-small" onclick="sendPrivateMessage(${chatId})">Enviar</button>
+                            </div>
+                        </div>
+                    `;
+
+                    document.getElementById('privateChatsList').innerHTML = 
+                        `<div class="messages-container">${messagesHtml}</div>${messageInput}`;
+                }
+            } catch (error) {
+                alert('Error al cargar chat');
+            }
+        }
+
+        async function sendPrivateMessage(chatId) {
+            const text = document.getElementById('privChatInput').value.trim();
+            if (!text) return;
+
+            try {
+                await fetch(`${API_URL}/mensaje?chat_id=${chatId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                openPrivateChat(chatId);
+            } catch (error) {
+                alert('Error al enviar');
+            }
+        }
+
+        async function exitChat(chatId) {
+            if (confirm('¿Salir de este chat?')) {
+                try {
+                    await fetch(`${API_URL}/privado/salir`, {
+                        method: 'POST',
+                        headers: {
+                            'X-API-KEY': API_KEY,
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ chat_id: chatId })
+                    });
+                    loadPrivateChats();
+                } catch (error) {
+                    alert('Error');
+                }
+            }
+        }
+
+        // =============== SOCIAL ===============
+        async function blockUser(userId) {
+            try {
+                const response = await fetch(`${API_URL}/bloquear`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Error: ' + (error.error || error.message || 'No se pudo bloquear'));
+                    return;
+                }
+
+                alert('Usuario bloqueado');
+                loadHome();
+            } catch (error) {
+                console.error('Block error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function unblockUser(userId) {
+            try {
+                const response = await fetch(`${API_URL}/bloquear/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Error: ' + (error.error || error.message || 'No se pudo desbloquear'));
+                    return;
+                }
+
+                alert('Usuario desbloqueado');
+                loadBlockedUsers();
+            } catch (error) {
+                console.error('Unblock error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function followUser(userId) {
+            try {
+                await fetch(`${API_URL}/seguir`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                alert('Siguiendo usuario');
+                loadHome();
+            } catch (error) {
+                alert('Error');
+            }
+        }
+
+        async function unfollowUser(userId) {
+            try {
+                const response = await fetch(`${API_URL}/seguir/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Error: ' + (error.error || error.message || 'No se pudo dejar de seguir'));
+                    return;
+                }
+
+                alert('Dejaste de seguir a este usuario');
+                loadFollowedUsers();
+            } catch (error) {
+                console.error('Unfollow error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function sendFriendRequest(userId) {
+            try {
+                await fetch(`${API_URL}/amistad/solicitar`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                alert('Solicitud de amistad enviada');
+                loadHome();
+            } catch (error) {
+                alert('Error');
+            }
+        }
+
+        async function loadBlockedUsers() {
+            try {
+                const response = await fetch(`${API_URL}/bloqueados`, {
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Error al cargar bloqueados');
+
+                const data = await response.json();
+                const html = data.blocked_users.map(user => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">${user.name}</div>
+                                <p style="color:#999;font-size:12px;">${user.email}</p>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-success btn-small" onclick="unblockUser(${user.id})">Desbloquear</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('blockedUsers').innerHTML = html || '<div class="empty-state"><p>No tienes usuarios bloqueados</p></div>';
+            } catch (error) {
+                console.error(error);
+                document.getElementById('blockedUsers').innerHTML = '<div class="empty-state"><p>Error al cargar</p></div>';
+            }
+        }
+
+        async function loadFollowedUsers() {
+            try {
+                const response = await fetch(`${API_URL}/seguidos`, {
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Error al cargar seguidos');
+
+                const data = await response.json();
+                const html = data.followed_users.map(user => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">${user.name}</div>
+                                <p style="color:#999;font-size:12px;">${user.email}</p>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-danger btn-small" onclick="unfollowUser(${user.id})">Dejar de seguir</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('followedUsers').innerHTML = html || '<div class="empty-state"><p>No estás siguiendo a nadie</p></div>';
+            } catch (error) {
+                console.error(error);
+                document.getElementById('followedUsers').innerHTML = '<div class="empty-state"><p>Error al cargar</p></div>';
+            }
+        }
+
+        async function loadFriendship() {
+            try {
+                const response = await fetch(`${API_URL}/amistad`, {
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const html = data.friends.map(friend => `
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">${friend.name}</div>
+                                    <p style="color:#999;font-size:12px;">${friend.email}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    document.getElementById('friendsList').innerHTML = html || '<div class="empty-state"><p>Sin amigos</p></div>';
+                }
+            } catch (error) {
+                console.error(error);
+            }
+
+            // Cargar solicitudes pendientes
+            try {
+                const response = await fetch(`${API_URL}/amistad/pendientes`, {
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const html = data.pending_requests.map(req => `
+                        <div class="request-item">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <div>
+                                    <div style="font-weight:600;">${req.sender_name}</div>
+                                    <p style="color:#999;font-size:12px;">${req.sender_email}</p>
+                                </div>
+                                <div class="actions">
+                                    <button class="btn btn-success btn-small" onclick="acceptFriendship(${req.id})">Aceptar</button>
+                                    <button class="btn btn-danger btn-small" onclick="rejectFriendship(${req.id})">Rechazar</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    document.getElementById('friendRequests').innerHTML = html || '<div class="empty-state"><p>Sin solicitudes pendientes</p></div>';
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('friendRequests').innerHTML = '<div class="empty-state"><p>Error al cargar solicitudes</p></div>';
+            }
+        }
+
+        async function acceptFriendship(requestId) {
+            try {
+                const response = await fetch(`${API_URL}/amistad/aceptar`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ friendship_request_id: requestId })
+                });
+
+                if (!response.ok) throw new Error('Error al aceptar');
+
+                alert('Amistad aceptada');
+                loadFriendship();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function rejectFriendship(requestId) {
+            try {
+                const response = await fetch(`${API_URL}/amistad/rechazar`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ friendship_request_id: requestId })
+                });
+
+                if (!response.ok) throw new Error('Error al rechazar');
+
+                alert('Solicitud rechazada');
+                loadFriendship();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function showError(elementId, message, isSuccess = false) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.classList.toggle('active', true);
+            if (isSuccess) el.classList.add('success');
+        }
+
+        // Initial load
+        loadHome();
+    </script>
+</body>
+</html>

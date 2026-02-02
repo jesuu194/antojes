@@ -20,7 +20,8 @@ class HomeController extends AbstractController
     ): JsonResponse {
         // Check API Key
         $apiKey = $request->headers->get('X-API-KEY');
-        if ($apiKey !== 'test-api-key') {
+        $expected = $this->getParameter('app_api_key');
+        if ($apiKey !== $expected) {
             return new JsonResponse(['error' => 'Invalid API Key'], 401);
         }
 

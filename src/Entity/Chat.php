@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Chat
 {
     #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
