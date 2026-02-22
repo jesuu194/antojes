@@ -7,7 +7,7 @@
         },
         "response": {
             "http_code": 200,
-            "body": "{\"token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NzAwMzIzNjQuOTIwNTk0LCJleHAiOjE3NzAwMzU5NjQuOTIwNTk0LCJ1c2VyX2lkIjoxLCJlbWFpbCI6InVzZXIxQGV4YW1wbGUuY29tIn0.sBQ_UOCkrQAIeB-S6Xd0DUaUE3-X589bcG6fC4__byg\",\"user\":{\"id\":1,\"name\":\"User One\",\"email\":\"user1@example.com\"}}",
+            "body": "{\"token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NzE3ODkxNjAuOTkyODYxLCJleHAiOjE3NzE3OTI3NjAuOTkyODYxLCJ1c2VyX2lkIjoxLCJlbWFpbCI6InVzZXIxQGV4YW1wbGUuY29tIn0.j2Psh8aFKPtJYJMPSzDoRjxUySB4zMLSYNOf9seazVo\",\"user\":{\"id\":1,\"name\":\"User One\",\"email\":\"user1@example.com\"}}",
             "errno": 0,
             "error": ""
         }
@@ -17,7 +17,7 @@
         "request": null,
         "response": {
             "http_code": 200,
-            "body": "{\"user\":{\"id\":1,\"name\":\"User One\",\"email\":\"user1@example.com\",\"lat\":\"40.71280000\",\"lng\":\"-74.00600000\",\"online\":true},\"nearby_users\":[{\"id\":2,\"name\":\"User Two\",\"distance\":0.01},{\"id\":3,\"name\":\"User Three\",\"distance\":0.03}]}",
+            "body": "{\"user\":{\"id\":1,\"name\":\"User One\",\"email\":\"user1@example.com\",\"lat\":\"40.7128\",\"lng\":\"-74.006\",\"online\":true},\"nearby_users\":[{\"id\":2,\"name\":\"User Two\",\"distance\":0.01},{\"id\":3,\"name\":\"User Three\",\"distance\":0.03}]}",
             "errno": 0,
             "error": ""
         }
@@ -27,7 +27,7 @@
         "request": null,
         "response": {
             "http_code": 200,
-            "body": "{\"chat\":{\"id\":1,\"type\":\"general\",\"is_active\":true},\"messages\":[{\"id\":2,\"user_id\":2,\"user_name\":\"User Two\",\"text\":\"Hi there!\",\"created_at\":\"2026-02-02 12:29:58\"},{\"id\":1,\"user_id\":1,\"user_name\":\"User One\",\"text\":\"Hello everyone!\",\"created_at\":\"2026-02-02 12:29:58\"}]}",
+            "body": "{\"chat\":{\"id\":1,\"type\":\"general\",\"is_active\":true},\"messages\":[{\"id\":2,\"user_id\":2,\"user_name\":\"User Two\",\"text\":\"Hi there!\",\"created_at\":\"2026-02-22 20:33:34\"},{\"id\":1,\"user_id\":1,\"user_name\":\"User One\",\"text\":\"Hello everyone!\",\"created_at\":\"2026-02-22 20:33:34\"}]}",
             "errno": 0,
             "error": ""
         }
@@ -47,7 +47,7 @@
         "request": null,
         "response": {
             "http_code": 200,
-            "body": "{\"id\":1,\"name\":\"User One\",\"email\":\"user1@example.com\",\"lat\":\"40.71280000\",\"lng\":\"-74.00600000\",\"online\":true}",
+            "body": "{\"id\":1,\"name\":\"User One\",\"email\":\"user1@example.com\",\"lat\":\"40.7128\",\"lng\":\"-74.006\",\"online\":true}",
             "errno": 0,
             "error": ""
         }
@@ -95,7 +95,7 @@
         "request": null,
         "response": {
             "http_code": 200,
-            "body": "{\"messages\":[{\"id\":2,\"user_id\":2,\"user_name\":\"User Two\",\"text\":\"Hi there!\",\"created_at\":\"2026-02-02 12:29:58\"},{\"id\":1,\"user_id\":1,\"user_name\":\"User One Updated From Script\",\"text\":\"Hello everyone!\",\"created_at\":\"2026-02-02 12:29:58\"},{\"id\":4,\"user_id\":1,\"user_name\":\"User One Updated From Script\",\"text\":\"Script test message\",\"created_at\":\"2026-02-02 12:39:29\"}]}",
+            "body": "{\"messages\":[{\"id\":2,\"user_id\":2,\"user_name\":\"User Two\",\"text\":\"Hi there!\",\"created_at\":\"2026-02-22 20:33:34\"},{\"id\":1,\"user_id\":1,\"user_name\":\"User One Updated From Script\",\"text\":\"Hello everyone!\",\"created_at\":\"2026-02-22 20:33:34\"},{\"id\":4,\"user_id\":1,\"user_name\":\"User One Updated From Script\",\"text\":\"Script test message\",\"created_at\":\"2026-02-22 20:39:23\"}]}",
             "errno": 0,
             "error": ""
         }
@@ -184,7 +184,7 @@
         "request": null,
         "response": {
             "http_code": 200,
-            "body": "{\"id\":1,\"name\":\"User One Updated From Script\",\"email\":\"user1@example.com\",\"lat\":\"40.71280000\",\"lng\":\"-74.00600000\",\"online\":true}",
+            "body": "{\"id\":1,\"name\":\"User One Updated From Script\",\"email\":\"user1@example.com\",\"lat\":\"40.7128\",\"lng\":\"-74.006\",\"online\":true}",
             "errno": 0,
             "error": ""
         }
