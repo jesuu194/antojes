@@ -9,4 +9,7 @@ COPY . .
 
 RUN mkdir -p var/cache var/log && chmod -R 777 var
 
-CMD php -S 0.0.0.0:$PORT -t public
+# Arranque:
+# - Crear esquema de la DB automáticamente
+# - Arrancar servidor
+CMD sh -c "php bin/console doctrine:schema:update --force || true && php -S 0.0.0.0:$PORT -t public"
