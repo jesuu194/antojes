@@ -2,8 +2,7 @@ FROM php:8.2-cli
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    git unzip curl sqlite3 \
+RUN apt-get update && apt-get install -y sqlite3 \
     && docker-php-ext-install pdo pdo_sqlite
 
 COPY . .
