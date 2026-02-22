@@ -37,7 +37,8 @@ class GeneralController extends AbstractController
             return new JsonResponse(['error' => 'Invalid token'], 401);
         }
 
-        $chat = $em->getRepository(Chat::class)->find(1);
+        // try to fetch the general chat; some DBs may not guarantee id=1
+        $chat = $em->getRepository(Chat::class)->findOneBy(['type' => 'general']);
         if (!$chat) {
             return new JsonResponse(['error' => 'General chat not found'], 404);
         }

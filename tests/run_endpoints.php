@@ -38,10 +38,14 @@ $results = [];
 $login = httpRequest('POST', $base . '/api/login', ['email'=>'user1@example.com','password'=>'password'], ['X-API-KEY'=>$apiKey]);
 $results[] = ['name'=>'POST /api/login','request'=>['email'=>'user1@example.com','password'=>'password'],'response'=>$login];
 $token = null;
+$userId = null;
 if ($login['http_code'] === 200) {
     $data = json_decode($login['body'], true);
     if (isset($data['token'])) {
         $token = $data['token'];
+    }
+    if (isset($data['user']['id'])) {
+        $userId = $data['user']['id'];
     }
 }
 
@@ -53,28 +57,69 @@ if (!$token) {
 
 $authHeader = ['X-API-KEY'=>$apiKey, 'Authorization'=>'Bearer ' . $token];
 
+// helper to fetch numeric IDs from listing
+$otherUserId = null;
+$generalChatId = null;
+
+// initial calls to fetch dynamic values
+$resp = httpRequest('GET', $base . '/api/usuarios', null, $authHeader);
+if ($resp['http_code'] === 200) {
+    $list = json_decode($resp['body'], true);
+    if (isset($list['users']) && is_array($list['users'])) {
+        foreach ($list['users'] as $u) {
+            if ($u['id'] !== $userId) {
+                $otherUserId = $u['id'];
+                break;
+            }
+        }
+    }
+}
+
+$resp = httpRequest('GET', $base . '/api/general', null, $authHeader);
+if ($resp['http_code'] === 200) {
+    $g = json_decode($resp['body'], true);
+    if (isset($g['chat']['id'])) {
+        $generalChatId = $g['chat']['id'];
+    }
+}
+
 $tests = [
     ['method'=>'GET','path'=>'/api/home','auth'=>true],
     ['method'=>'GET','path'=>'/api/general','auth'=>true],
     ['method'=>'GET','path'=>'/api/usuarios','auth'=>true],
-    ['method'=>'GET','path'=>'/api/usuarios/1','auth'=>true],
-    // create user (public)
-    ['method'=>'POST','path'=>'/api/usuarios','auth'=>false,'body'=>['name'=>'Test User','email'=>'testuser_for_script@example.com','password'=>'pwd']],
-    ['method'=>'PUT','path'=>'/api/usuarios/1','auth'=>true,'body'=>['name'=>'User One Updated From Script']],
-    ['method'=>'POST','path'=>'/api/mensaje?chat_id=1','auth'=>true,'body'=>['text'=>'Script test message']],
-    ['method'=>'GET','path'=>'/api/mensaje?chat_id=1','auth'=>true],
-    ['method'=>'POST','path'=>'/api/seguir','auth'=>true,'body'=>['user_id'=>2]],
-    ['method'=>'GET','path'=>'/api/seguidos','auth'=>true],
-    ['method'=>'POST','path'=>'/api/bloquear','auth'=>true,'body'=>['user_id'=>4]],
-    ['method'=>'GET','path'=>'/api/bloqueados','auth'=>true],
-    ['method'=>'POST','path'=>'/api/invitar','auth'=>true,'body'=>['user_id'=>2]],
-    ['method'=>'GET','path'=>'/api/privado','auth'=>true],
-    ['method'=>'POST','path'=>'/api/actualizar','auth'=>true,'body'=>['lat'=>40.7128,'lng'=>-74.0060]],
-    ['method'=>'GET','path'=>'/api/perfil','auth'=>true],
-    ['method'=>'POST','path'=>'/api/amistad/solicitar','auth'=>true,'body'=>['user_id'=>4]],
-    ['method'=>'GET','path'=>'/api/amistad/pendientes','auth'=>true],
-    ['method'=>'POST','path'=>'/api/logout','auth'=>true,'body'=>new stdClass()],
 ];
+// show current user if we know id
+if ($userId) {
+    $tests[] = ['method'=>'GET','path'=>'/api/usuarios/' . $userId,'auth'=>true];
+    $tests[] = ['method'=>'PUT','path'=>'/api/usuarios/' . $userId,'auth'=>true,'body'=>['name'=>'User One Updated From Script']];
+}
+
+// create another user
+$tests[] = ['method'=>'POST','path'=>'/api/usuarios','auth'=>false,'body'=>['name'=>'Test User','email'=>'testuser_for_script@example.com','password'=>'pwd']];
+
+// messaging
+if ($generalChatId) {
+    $tests[] = ['method'=>'POST','path'=>'/api/mensaje?chat_id=' . $generalChatId,'auth'=>true,'body'=>['text'=>'Script test message']];
+    $tests[] = ['method'=>'GET','path'=>'/api/mensaje?chat_id=' . $generalChatId,'auth'=>true];
+}
+
+// follow / block / invite using otherUserId
+if ($otherUserId) {
+    $tests[] = ['method'=>'POST','path'=>'/api/seguir','auth'=>true,'body'=>['user_id'=>$otherUserId]];
+    $tests[] = ['method'=>'POST','path'=>'/api/bloquear','auth'=>true,'body'=>['user_id'=>$otherUserId]];
+    $tests[] = ['method'=>'POST','path'=>'/api/invitar','auth'=>true,'body'=>['user_id'=>$otherUserId]];
+    $tests[] = ['method'=>'POST','path'=>'/api/amistad/solicitar','auth'=>true,'body'=>['user_id'=>$otherUserId]];
+}
+
+// remaining static tests
+$tests[] = ['method'=>'GET','path'=>'/api/seguidos','auth'=>true];
+$tests[] = ['method'=>'GET','path'=>'/api/bloqueados','auth'=>true];
+$tests[] = ['method'=>'GET','path'=>'/api/privado','auth'=>true];
+$tests[] = ['method'=>'POST','path'=>'/api/actualizar','auth'=>true,'body'=>['lat'=>40.7128,'lng'=>-74.0060]];
+$tests[] = ['method'=>'GET','path'=>'/api/perfil','auth'=>true];
+$tests[] = ['method'=>'GET','path'=>'/api/amistad/pendientes','auth'=>true];
+$tests[] = ['method'=>'POST','path'=>'/api/logout','auth'=>true,'body'=>new stdClass()];
+
 
 foreach ($tests as $t) {
     $url = $base . $t['path'];

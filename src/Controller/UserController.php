@@ -101,6 +101,32 @@ class UserController extends AbstractController
         ]);
     }
 
+    #[Route('/api/usuarios/me', name: 'api_usuarios_me', methods: ['GET'])]
+    public function me(
+        Request $request,
+        EntityManagerInterface $em,
+        JwtService $jwtService
+    ): JsonResponse {
+        $token = $this->getTokenFromRequest($request, $jwtService);
+        if (!$token) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $user = $em->getRepository(User::class)->find($token['user_id']);
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], 404);
+        }
+
+        return new JsonResponse([
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+            'lat' => $user->getLat(),
+            'lng' => $user->getLng(),
+            'online' => $user->isOnline(),
+        ]);
+    }
+
     #[Route('/api/usuarios/{id}', name: 'api_usuarios_update', methods: ['PUT'], requirements: ['id' => '\\d+'])]
     public function update(
         int $id,
@@ -114,6 +140,35 @@ class UserController extends AbstractController
         }
 
         $user = $em->getRepository(User::class)->find($id);
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        if ($data && isset($data['name'])) {
+            $user->setName($data['name']);
+        }
+        if ($data && isset($data['email'])) {
+            $user->setEmail($data['email']);
+        }
+
+        $em->flush();
+
+        return new JsonResponse(['message' => 'User updated']);
+    }
+
+    #[Route('/api/usuarios/me', name: 'api_usuarios_update_me', methods: ['PUT'])]
+    public function updateMe(
+        Request $request,
+        EntityManagerInterface $em,
+        JwtService $jwtService
+    ): JsonResponse {
+        $token = $this->getTokenFromRequest($request, $jwtService);
+        if (!$token) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $user = $em->getRepository(User::class)->find($token['user_id']);
         if (!$user) {
             return new JsonResponse(['error' => 'User not found'], 404);
         }

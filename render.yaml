@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: chat-geolocalizado-api
+    runtime: php
+    runtimeVersion: 8.2
+    plan: free
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php bin/console cache:warmup --env=prod
+    startCommand: php -S 0.0.0.0:$PORT -t public
+    env:
+      - key: APP_ENV
+        value: prod
+      - key: APP_DEBUG
+        value: "0"
+      - key: APP_SECRET
+        generateValue: true
+      - key: APP_API_KEY
+        value: test-api-key
+      - key: DEFAULT_URI
+        fromService:
+          type: web
+          property: url
+    envFrom:
+      - source: psql-postgres
+        property: DATABASE_URL
+        as: DATABASE_URL
+
+databases:
+  - name: psql-postgres
+    databaseName: chat_geolocalizado
+    engine: postgres
+    plan: free
+    ipAllowList: []

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pruebas API Antojess</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { color: white; text-align: center; margin-bottom: 30px; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .section { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .section h2 { color: #333; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        input, button, select, textarea { 
+            margin: 8px 0; 
+            width: 100%; 
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+        button:hover { background: #5568d3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .endpoints-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+        }
+        .endpoints-grid button {
+            font-size: 11px;
+            padding: 8px;
+            white-space: pre-wrap;
+        }
+        .output { 
+            white-space: pre-wrap; 
+            background: #f5f5f5; 
+            padding: 12px; 
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+        }
+        .doc-content {
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .doc-content h3 { color: #667eea; margin: 10px 0 5px 0; }
+        .doc-content p { margin: 8px 0; }
+        .doc-content pre {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+            margin: 8px 0;
+        }
+        .doc-content strong { color: #333; }
+        .right-panel { display: flex; flex-direction: column; gap: 20px; }
+        @media (max-width: 1200px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🚀 Interfaz de Prueba - API Chat Geolocalizado</h1>
+    
+    <div class="main-grid">
+        <!-- LEFT: CONTROLS -->
+        <div>
+            <div class="section">
+                <h2>⚙️ Configuración</h2>
+                <label>Base URL:</label>
+                <input id="baseUrl" type="text" value="http://127.0.0.1:8000/api" />
+                <label>API Key:</label>
+                <input id="apiKey" type="text" value="test-api-key" />
+                <label>Token (Bearer):</label>
+                <input id="token" type="text" placeholder="se autorellena al hacer login" />
+            </div>
+
+            <div class="section">
+                <h2>🔐 Login</h2>
+                <label>Email:</label><input id="loginEmail" type="text" value="user1@example.com" />
+                <label>Password:</label><input id="loginPwd" type="password" value="password" />
+                <button onclick="callEndpoint('POST','/login', getLoginBody(), getLoginDoc())">Login</button>
+            </div>
+
+            <div class="section">
+                <h2>📡 Endpoints</h2>
+                <div class="endpoints-grid" id="endpoints"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT: DOCS + RESULTS -->
+        <div class="right-panel">
+            <div class="section">
+                <h2>📖 Documentación</h2>
+                <div id="doc" class="doc-content"></div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Resultado</h2>
+                <div id="result" class="output"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let generalChatId = null;
+
+const apiSections = [
+    {
+        name:'Home', 
+        method:'GET', 
+        path:'/home',
+        doc:`<h3>🏠 GET /api/home</h3>
+<p><strong>Descripción:</strong> Obtiene los datos del usuario actual y lista todos los usuarios cercanos dentro de 5km usando geolocalización (Haversine).</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Parámetros:</strong> Ninguno</p>
+<p><strong>Respuesta (200):</strong></p>
+<pre>{"user":{"id":1,"name":"User 1","email":"user1@example.com","lat":40.7128,"lng":-74.0060,"online":true},"nearby_users":[...]}</pre>`
+    },
+    {
+        name:'General', 
+        method:'GET', 
+        path:'/general',
+        doc:`<h3>📢 GET /api/general</h3>
+<p><strong>Descripción:</strong> Obtiene el chat general compartido por toda la aplicación.</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Parámetros:</strong> Ninguno</p>
+<p><strong>Respuesta (200):</strong></p>
+<pre>{"chat":{"id":1,"name":"General","type":"general","created_at":"2025-02-02T11:29:04+00:00"}}</pre>`
+    },
+    {
+        name:'Usuarios', 
+        method:'GET', 
+        path:'/usuarios',
+        doc:`<h3>👥 GET /api/usuarios</h3>
+<p><strong>Descripción:</strong> Lista todos los usuarios registrados en la plataforma.</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Parámetros:</strong> Ninguno</p>
+<p><strong>Respuesta (200):</strong></p>
+<pre>{"users":[{"id":1,"name":"User 1","email":"user1@example.com","lat":40.7128,"lng":-74.0060,"online":true}]}</pre>`
+    },
+    {
+        name:'Mi usuario', 
+        method:'GET', 
+        path:'/usuarios/me',
+        doc:`<h3>🔐 GET /api/usuarios/me</h3>
+<p><strong>Descripción:</strong> Obtiene los datos del usuario autenticado actualmente (sin necesidad de pasar ID).</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Parámetros:</strong> Ninguno</p>
+<p><strong>Respuesta (200):</strong></p>
+<pre>{"id":1,"name":"User 1","email":"user1@example.com","lat":40.7128,"lng":-74.0060,"online":true}</pre>`
+    },
+    {
+        name:'Crear usuario', 
+        method:'POST', 
+        path:'/usuarios', 
+        body:{name:'Nuevo Usuario',email:'nuevo@example.com',password:'password123'},
+        doc:`<h3>➕ POST /api/usuarios</h3>
+<p><strong>Descripción:</strong> Crea un nuevo usuario en la plataforma.</p>
+<p><strong>Autenticación:</strong> API Key (requerida)</p>
+<p><strong>Body:</strong></p>
+<pre>{"name":"John Doe","email":"john@example.com","password":"securepass"}</pre>
+<p><strong>Respuesta (201):</strong> Usuario creado correctamente con ID generado</p>`
+    },
+    {
+        name:'Actualizar mi usuario', 
+        method:'PUT', 
+        path:'/usuarios/me', 
+        body:{name:'Usuario Modificado'},
+        doc:`<h3>✏️ PUT /api/usuarios/me</h3>
+<p><strong>Descripción:</strong> Actualiza los datos del usuario autenticado (nombre, ubicación, etc).</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Body (opcional):</strong></p>
+<pre>{"name":"New Name","lat":40.7130,"lng":-74.0061}</pre>
+<p><strong>Respuesta (200):</strong> Datos del usuario actualizado</p>`
+    },
+    {
+        name:'Enviar mensaje general', 
+        method:'POST', 
+        path:'/mensaje?chat_id=1', 
+        body:{text:'Hola a todos desde el test!'},
+        doc:`<h3>💬 POST /api/mensaje</h3>
+<p><strong>Descripción:</strong> Envía un mensaje a un chat específico.</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Query Parameters:</strong> <code>chat_id</code> (requerido)</p>
+<p><strong>Body:</strong></p>
+<pre>{"text":"Hello world"}</pre>
+<p><strong>Respuesta (201):</strong> Mensaje creado con timestamp</p>`
+    },
+    {
+        name:'Seguir otro', 
+        method:'POST', 
+        path:'/seguir', 
+        body:{user_id:null},
+        doc:`<h3>⭐ POST /api/seguir</h3>
+<p><strong>Descripción:</strong> Sigue a otro usuario (notificación de seguimiento).</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Body:</strong></p>
+<pre>{"user_id":2}</pre>
+<p><strong>Respuesta (201):</strong> Relación de seguimiento creada</p>`
+    },
+    {
+        name:'Bloquear otro', 
+        method:'POST', 
+        path:'/bloquear', 
+        body:{user_id:null},
+        doc:`<h3>🚫 POST /api/bloquear</h3>
+<p><strong>Descripción:</strong> Bloquea a otro usuario impidiendo que vea tu presencia.</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Body:</strong></p>
+<pre>{"user_id":2}</pre>
+<p><strong>Respuesta (201):</strong> Bloqueo registrado</p>`
+    },
+    {
+        name:'Invitar otro', 
+        method:'POST', 
+        path:'/invitar', 
+        body:{user_id:null},
+        doc:`<h3>📧 POST /api/invitar</h3>
+<p><strong>Descripción:</strong> Invita a otro usuario a un chat privado.</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Body:</strong></p>
+<pre>{"user_id":2}</pre>
+<p><strong>Respuesta (201):</strong> Invitación enviada</p>`
+    },
+    {
+        name:'Privado', 
+        method:'GET', 
+        path:'/privado',
+        doc:`<h3>🔒 GET /api/privado</h3>
+<p><strong>Descripción:</strong> Lista todos los chats privados del usuario autenticado.</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Parámetros:</strong> Ninguno</p>
+<p><strong>Respuesta (200):</strong></p>
+<pre>{"chats":[{"id":2,"name":"Chat with User 2","type":"private","members":[...]}]}</pre>`
+    },
+    {
+        name:'Actualizar ubicación', 
+        method:'POST', 
+        path:'/actualizar', 
+        body:{lat:40.7128,lng:-74.0060},
+        doc:`<h3>📍 POST /api/actualizar</h3>
+<p><strong>Descripción:</strong> Actualiza la ubicación geográfica del usuario (necesario para filtro de 5km).</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Body:</strong></p>
+<pre>{"lat":40.7128,"lng":-74.0060}</pre>
+<p><strong>Respuesta (200):</strong> Ubicación actualizada</p>`
+    },
+    {
+        name:'Perfil', 
+        method:'GET', 
+        path:'/perfil',
+        doc:`<h3>👤 GET /api/perfil</h3>
+<p><strong>Descripción:</strong> Obtiene el perfil detallado del usuario autenticado.</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Parámetros:</strong> Ninguno</p>
+<p><strong>Respuesta (200):</strong> Perfil con datos completos del usuario</p>`
+    },
+    {
+        name:'Solicitar amistad', 
+        method:'POST', 
+        path:'/amistad/solicitar', 
+        body:{user_id:null},
+        doc:`<h3>🤝 POST /api/amistad/solicitar</h3>
+<p><strong>Descripción:</strong> Envía una solicitud de amistad a otro usuario.</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Body:</strong></p>
+<pre>{"user_id":2}</pre>
+<p><strong>Respuesta (201):</strong> Solicitud creada en estado "pending"</p>`
+    },
+    {
+        name:'Pendientes', 
+        method:'GET', 
+        path:'/amistad/pendientes',
+        doc:`<h3>⏳ GET /api/amistad/pendientes</h3>
+<p><strong>Descripción:</strong> Lista todas las solicitudes de amistad pendientes del usuario.</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Parámetros:</strong> Ninguno</p>
+<p><strong>Respuesta (200):</strong></p>
+<pre>{"pending_requests":[{"id":1,"from_user":{"id":2,"name":"User 2"},"status":"pending"}]}</pre>`
+    },
+    {
+        name:'Logout', 
+        method:'POST', 
+        path:'/logout', 
+        body:{},
+        doc:`<h3>🚪 POST /api/logout</h3>
+<p><strong>Descripción:</strong> Cierra la sesión del usuario (marca como offline).</p>
+<p><strong>Autenticación:</strong> Bearer Token (requerido)</p>
+<p><strong>Body:</strong> (vacío)</p>
+<p><strong>Respuesta (200):</strong> Usuario marcado como offline</p>`
+    }
+];
+
+function buildControls() {
+    const container = document.getElementById('endpoints');
+    apiSections.forEach(sec=>{
+        const btn = document.createElement('button');
+        btn.textContent = sec.name;
+        btn.disabled = true;
+        btn.onclick = ()=>callEndpoint(sec.method, sec.path, sec.body, sec.doc);
+        btn.id = 'btn-' + sec.name.replace(/\s+/g,'_');
+        container.appendChild(btn);
+    });
+}
+
+function getLoginBody(){
+    return {email: document.getElementById('loginEmail').value, password: document.getElementById('loginPwd').value};
+}
+
+function getLoginDoc(){
+    return `<h3>🔐 POST /api/login</h3>
+<p><strong>Descripción:</strong> Autentica un usuario y retorna un token JWT para acceder a endpoints protegidos.</p>
+<p><strong>Autenticación:</strong> API Key (requerida)</p>
+<p><strong>Body:</strong></p>
+<pre>{"email":"user1@example.com","password":"password"}</pre>
+<p><strong>Respuesta (200):</strong></p>
+<pre>{"token":"eyJhbGc...","user":{"id":1,"email":"user1@example.com"}}</pre>`;
+}
+
+async function callEndpoint(method, path, body=null, doc=null) {
+    const baseUrl = document.getElementById('baseUrl').value;
+    const apiKey = document.getElementById('apiKey').value;
+    let token = document.getElementById('token').value;
+    
+    // Mostrar documentación del endpoint
+    if(doc) document.getElementById('doc').innerHTML = doc;
+    
+    // replace placeholders
+    if (path.includes('chat_id=1') && generalChatId) {
+        path = path.replace('chat_id=1', 'chat_id=' + generalChatId);
+    }
+    if (body && body.user_id === null) {
+        if (window.otherUserId) body.user_id = window.otherUserId;
+    }
+    
+    let url = baseUrl + path;
+    let opts = {method, headers:{'X-API-KEY':apiKey,'Content-Type':'application/json'}};
+    if(token) opts.headers['Authorization']='Bearer '+token;
+    
+    if(body) {
+        opts.body = JSON.stringify(body);
+        console.log('sending', method, url, opts);
+        document.getElementById('result').innerHTML = '<strong>Request Payload:</strong><pre>'+JSON.stringify(body,null,2)+'</pre>';
+    }
+    
+    try {
+        const resp = await fetch(url, opts);
+        const text = await resp.text();
+        let respStr = '<strong>HTTP '+resp.status+'</strong><pre>';
+        try {
+            respStr += JSON.stringify(JSON.parse(text), null, 2);
+        } catch {
+            respStr += text;
+        }
+        respStr += '</pre>';
+        document.getElementById('result').innerHTML = (document.getElementById('result').innerHTML || '') + respStr;
+        
+        if(path==='/login' && resp.ok){
+            const js = JSON.parse(text);
+            document.getElementById('token').value = js.token;
+            enableButtons();
+            // after login fetch other info
+            fetch(baseUrl + '/general', {headers: opts.headers})
+                .then(r=>r.json())
+                .then(j=>{ if(j.chat && j.chat.id) generalChatId = j.chat.id; });
+            fetch(baseUrl + '/usuarios', {headers: opts.headers})
+                .then(r=>r.json())
+                .then(j=>{ if(j.users && j.users.length){
+                    const me = j.users.find(u=>u.email===js.user.email);
+                    window.otherUserId = j.users.find(u=>u.id!==me.id)?.id;
+                }});
+        }
+    } catch(e){
+        document.getElementById('result').innerHTML = '<strong style="color:red;">Error:</strong> '+e.message;
+    }
+}
+
+buildControls();
+
+// Auto-login on page load
+window.addEventListener('load', () => {
+    const fixed = {email:'user1@example.com', password:'password'};
+    document.getElementById('loginEmail').value = fixed.email;
+    document.getElementById('loginPwd').value = fixed.password;
+    callEndpoint('POST', '/login', fixed, getLoginDoc());
+});
+
+function enableButtons() {
+    apiSections.forEach(sec=>{
+        const btn = document.getElementById('btn-' + sec.name.replace(/\s+/g,'_'));
+        if(btn) btn.disabled = false;
+    });
+}
+</script>
+
+</body>
+</html>
