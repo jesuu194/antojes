@@ -13,19 +13,15 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Copiar proyecto
 COPY . .
 
-# Instalar dependencias de Symfony
+# Instalar dependencias
 RUN composer install --no-dev --optimize-autoloader
 
-# Asegurar permisos en carpetas de cache/log
+# Permisos
 RUN mkdir -p var/cache var/log && chmod -R 777 var
 
-# Limpiar cache (no falla si algo va mal)
-RUN php bin/console cache:clear --env=prod || true
+# Mostrar errores PHP
+ENV PHP_DISPLAY_ERRORS=1
+ENV PHP_DISPLAY_STARTUP_ERRORS=1
 
-# Arranque:
-# - Crear DB si no existe
-# - Crear esquema (si no hay migraciones)
-# - Arrancar servidor PHP
-CMD sh -c "php bin/console doctrine:database:create --if-not-exists || true && \
-           php bin/console doctrine:schema:update --force || true && \
-           php -S 0.0.0.0:$PORT -t public"
+# Arranque simple, sin doctrine por ahora (para ver el error real)
+CMD php -d display_errors=1 -d display_startup_errors=1 -S 0.0.0.0:$PORT -t public
