@@ -3,7 +3,12 @@
 
 echo "🚀 Starting deployment..."
 echo "Environment: APP_ENV=${APP_ENV:-not-set}"
-echo "Port: ${PORT:-10000}"
+
+# Railway inyecta PORT automáticamente, pero por si acaso:
+if [ -z "$PORT" ]; then
+    export PORT=10000
+fi
+echo "Port: $PORT"
 
 # Función para esperar a que la base de datos esté disponible
 wait_for_db() {
@@ -57,5 +62,6 @@ echo "✅ Starting PHP server..."
 echo "📂 Public directory contents:"
 ls -la /app/public/*.html 2>/dev/null || echo "No HTML files found"
 
-# Iniciar servidor
-exec php -S 0.0.0.0:${PORT:-10000} -t /app/public /app/public/router.php
+# Iniciar servidor en el puerto correcto
+echo "Starting server on 0.0.0.0:$PORT"
+exec php -S "0.0.0.0:$PORT" -t /app/public /app/public/router.php
