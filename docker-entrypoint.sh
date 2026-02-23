@@ -32,34 +32,22 @@ wait_for_db() {
 if wait_for_db; then
     echo "🔍 Database connection established"
     
-    # Verificar si necesitamos crear el schema
-    echo "📋 Checking database schema..."
-    if php bin/console doctrine:schema:validate 2>&1 | grep -q "NOT in sync"; then
-        echo "📦 Creating database schema..."
-        if php bin/console doctrine:schema:create --no-interaction 2>&1; then
-            echo "✅ Schema created"
-            
-            # Cargar fixtures solo en el primer despliegue
-            echo "👥 Loading initial data (fixtures)..."
-            if php bin/console doctrine:fixtures:load --no-interaction 2>&1; then
-                echo "✅ Fixtures loaded successfully"
-            else
-                echo "⚠️ Fixtures failed - continuing anyway"
-            fi
+    # Crear el schema directamente (sin migraciones para evitar problemas SQLite/PostgreSQL)
+    echo "📦 Creating database schema..."
+    if php bin/console doctrine:schema:create --no-interaction 2>&1 | grep -q "already exists"; then
+        echo "✅ Schema already exists"
+    elif php bin/console doctrine:schema:create --no-interaction 2>&1; then
+        echo "✅ Schema created successfully"
+        
+        # Cargar fixtures solo en el primer despliegue
+        echo "👥 Loading initial data (fixtures)..."
+        if php bin/console doctrine:fixtures:load --no-interaction 2>&1; then
+            echo "✅ Fixtures loaded successfully"
         else
-            echo "⚠️ Schema creation failed, trying migrations..."
-            # Si falla la creación, intentar migraciones
-            if php bin/console doctrine:migrations:migrate --no-interaction 2>&1; then
-                echo "✅ Migrations completed"
-            else
-                echo "⚠️ Migrations also failed"
-            fi
+            echo "⚠️ Fixtures failed - continuing anyway"
         fi
     else
-        echo "✅ Schema is valid"
-        # Ejecutar migraciones si existen
-        echo "📦 Running migrations (if any)..."
-        php bin/console doctrine:migrations:migrate --no-interaction 2>&1 || echo "⚠️ No migrations to run"
+        echo "⚠️ Schema creation failed, database might already be initialized"
     fi
 else
     echo "⚠️ Starting server without database (this will likely fail)"
