@@ -13,18 +13,21 @@ echo "Port: $PORT"
 # Función para esperar a que la base de datos esté disponible
 wait_for_db() {
     echo "⏳ Waiting for database to be ready..."
+    echo "DATABASE_URL: ${DATABASE_URL:0:30}..." # Mostrar solo inicio para no exponer password
     max_attempts=30
     attempt=1
     
     while [ $attempt -le $max_attempts ]; do
         echo "  Attempt $attempt/$max_attempts..."
         
-        if php bin/console dbal:run-sql "SELECT 1" >/dev/null 2>&1; then
+        # Intentar conexión y capturar el error
+        if error_output=$(php bin/console dbal:run-sql "SELECT 1" 2>&1); then
             echo "✅ Database is ready!"
             return 0
         fi
         
-        echo "  Database not ready yet, waiting 2 seconds..."
+        echo "  Database not ready: $error_output"
+        echo "  Waiting 2 seconds..."
         sleep 2
         attempt=$((attempt + 1))
     done
