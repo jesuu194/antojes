@@ -14,10 +14,15 @@
    - **Name**: `antojes-db`
    - **Database**: `antojes_db`
    - **User**: `antojes_user` (o déjalo auto)
-   - **Region**: Frankfurt (EU Central) 
+   - **Region**: Frankfurt (EU Central) ⚠️ **MUY IMPORTANTE**
    - **Plan**: **Free**
 4. Click **"Create Database"**
-5. **IMPORTANTE**: Copia la **"Internal Database URL"** (la necesitarás)
+5. **Espera a que esté "Available"** (1-2 minutos)
+6. **⚠️ CRÍTICO**: En la sección "Connections":
+   - **NO copies** la "External Database URL"
+   - **SÍ copia** la **"Internal Database URL"** 
+   - Debe empezar con: `postgresql://...@dpg-xxxxx-internal/...`
+   - Guárdala en un lugar seguro
 
 ### 2️⃣ Crear Web Service
 1. Click **"New +"** → **"Web Service"**
@@ -30,7 +35,7 @@
 
 **Información Básica:**
 - **Name**: `antojes-api`
-- **Region**: Frankfurt (EU Central) - mismo que la BD
+- **Region**: Frankfurt (EU Central) ⚠️ **DEBE SER LA MISMA que la BD**
 - **Branch**: `main`
 - **Root Directory**: (dejar vacío)
 
@@ -59,9 +64,23 @@ Ejecuta en tu PowerShell local:
 -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 32 | % {[char]$_})
 ```
 
-**DATABASE_URL:**
-- Usa la **Internal Database URL** que copiaste en el paso 1
-- Ejemplo: `postgresql://user:password@dpg-xxxxx-internal/database`
+**⚠️ DATABASE_URL - MUY IMPORTANTE:**
+- **DEBE ser** la **"Internal Database URL"** que copiaste
+- **Formato correcto:** `postgresql://user:password@dpg-xxxxx-internal/database`
+- **Debe contener:** `-internal` en el host
+- **NO uses** la External URL (termina en `.render.com`)
+
+**Ejemplo correcto:**
+```
+postgresql://antojes_user:abc123@dpg-abc123-internal/antojes_db
+                                          ^^^^^^^^ DEBE decir "internal"
+```
+
+**Ejemplo INCORRECTO (no uses esto):**
+```
+postgresql://antojes_user:abc123@dpg-abc123.frankfurt-postgres.render.com/antojes_db
+                                                                ^^^^^^^^^^ NO uses .render.com
+```
 
 ### 5️⃣ Crear el Servicio
 
@@ -74,6 +93,20 @@ Ejecuta en tu PowerShell local:
    - ✅ Iniciar el servidor
 
 ⏱️ Esto toma aproximadamente **3-5 minutos**
+
+**Durante el deploy, verás en los logs:**
+```
+⏳ Waiting for database to be ready...
+  Attempt 1/30...
+  Attempt 2/30...
+✅ Database is ready!
+📋 Checking database schema...
+📦 Creating database schema...
+✅ Schema created
+👥 Loading initial data (fixtures)...
+✅ Fixtures loaded successfully
+✅ Starting PHP server...
+```
 
 ### 6️⃣ Verificar el Deployment
 
@@ -101,6 +134,25 @@ curl https://antojes-api.onrender.com/api/home \
 ```
 
 ## 🔍 Si algo falla...
+
+### ❌ Error: "Failed to fetch" con PostgreSQL
+
+**Este es el error MÁS COMÚN.** Causas y soluciones:
+
+1. **DATABASE_URL incorrecta:**
+   - ✅ Verifica que uses la **Internal** URL (con `-internal`)
+   - ❌ NO uses la External URL (con `.render.com`)
+
+2. **Regiones diferentes:**
+   - ✅ Database y Web Service deben estar en la **MISMA región**
+   - Ve a Settings de ambos y verifica
+
+3. **Base de datos no lista:**
+   - Espera a que PostgreSQL esté "Available"
+   - Los logs mostrarán "⏳ Waiting for database..."
+   - Es normal esperar hasta 60 segundos
+
+**📚 Para más detalles, ver:** [TROUBLESHOOTING_RENDER.md](TROUBLESHOOTING_RENDER.md)
 
 ### Ver los Logs:
 1. En tu Web Service, click en **"Logs"**

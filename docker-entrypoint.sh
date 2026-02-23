@@ -5,33 +5,69 @@ echo "🚀 Starting deployment..."
 echo "Environment: APP_ENV=${APP_ENV:-not-set}"
 echo "Port: ${PORT:-10000}"
 
-# Verificar conexión a base de datos
-echo "🔍 Checking database connection..."
-if php bin/console dbal:run-sql "SELECT 1" 2>/dev/null; then
-    echo "✅ Database connection OK"
+# Función para esperar a que la base de datos esté disponible
+wait_for_db() {
+    echo "⏳ Waiting for database to be ready..."
+    max_attempts=30
+    attempt=1
     
-    # Ejecutar migraciones
-    echo "📦 Running migrations..."
-    if php bin/console doctrine:migrations:migrate --no-interaction 2>&1; then
-        echo "✅ Migrations completed"
-    else
-        echo "⚠️ Migrations failed or no migrations to run"
-    fi
+    while [ $attempt -le $max_attempts ]; do
+        echo "  Attempt $attempt/$max_attempts..."
+        
+        if php bin/console dbal:run-sql "SELECT 1" >/dev/null 2>&1; then
+            echo "✅ Database is ready!"
+            return 0
+        fi
+        
+        echo "  Database not ready yet, waiting 2 seconds..."
+        sleep 2
+        attempt=$((attempt + 1))
+    done
+    
+    echo "❌ Database connection timeout after $max_attempts attempts"
+    return 1
+}
 
-    # Cargar fixtures solo si las tablas están vacías
-    echo "👥 Loading fixtures..."
-    if php bin/console doctrine:fixtures:load --no-interaction --append 2>&1; then
-        echo "✅ Fixtures loaded"
+# Esperar a que PostgreSQL esté disponible
+if wait_for_db; then
+    echo "🔍 Database connection established"
+    
+    # Verificar si necesitamos crear el schema
+    echo "📋 Checking database schema..."
+    if php bin/console doctrine:schema:validate 2>&1 | grep -q "NOT in sync"; then
+        echo "📦 Creating database schema..."
+        if php bin/console doctrine:schema:create --no-interaction 2>&1; then
+            echo "✅ Schema created"
+            
+            # Cargar fixtures solo en el primer despliegue
+            echo "👥 Loading initial data (fixtures)..."
+            if php bin/console doctrine:fixtures:load --no-interaction 2>&1; then
+                echo "✅ Fixtures loaded successfully"
+            else
+                echo "⚠️ Fixtures failed - continuing anyway"
+            fi
+        else
+            echo "⚠️ Schema creation failed, trying migrations..."
+            # Si falla la creación, intentar migraciones
+            if php bin/console doctrine:migrations:migrate --no-interaction 2>&1; then
+                echo "✅ Migrations completed"
+            else
+                echo "⚠️ Migrations also failed"
+            fi
+        fi
     else
-        echo "⚠️ Fixtures failed - database might already have data"
+        echo "✅ Schema is valid"
+        # Ejecutar migraciones si existen
+        echo "📦 Running migrations (if any)..."
+        php bin/console doctrine:migrations:migrate --no-interaction 2>&1 || echo "⚠️ No migrations to run"
     fi
 else
-    echo "⚠️ Database connection failed - server will start anyway"
+    echo "⚠️ Starting server without database (this will likely fail)"
 fi
 
-echo "✅ Starting server..."
-echo "📂 Listing public directory:"
+echo "✅ Starting PHP server..."
+echo "📂 Public directory contents:"
 ls -la /app/public/*.html 2>/dev/null || echo "No HTML files found"
 
-# Iniciar servidor con router simplificado
+# Iniciar servidor
 exec php -S 0.0.0.0:${PORT:-10000} -t /app/public /app/public/router.php
