@@ -101,13 +101,13 @@ class AppFixtures extends Fixture
         $msg1 = new Message();
         $msg1->setChat($generalChat);
         $msg1->setUser($users[0]);
-        $msg1->setText('Hello everyone!');
+        $msg1->setText('¡Hola a todos!');
         $manager->persist($msg1);
 
         $msg2 = new Message();
         $msg2->setChat($generalChat);
         $msg2->setUser($users[1]);
-        $msg2->setText('Hi there!');
+        $msg2->setText('¡Hola!');
         $manager->persist($msg2);
 
         // Create private chat between user1 and user2

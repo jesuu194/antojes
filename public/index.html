@@ -205,35 +205,154 @@
                 <div id="update-response" class="response" style="display: none;"></div>
             </div>
 
-            <!-- Other Endpoints -->
+            <!-- Logout -->
             <div class="section">
-                <h2>📡 Otros Endpoints Disponibles</h2>
-                <div class="endpoints">
-                    <div class="endpoint-card">
-                        <h3>POST /api/logout</h3>
-                        <p>Cerrar sesión</p>
-                    </div>
-                    <div class="endpoint-card">
-                        <h3>GET /api/perfil?id=X</h3>
-                        <p>Ver perfil de usuario</p>
-                    </div>
-                    <div class="endpoint-card">
-                        <h3>POST /api/enviar-mensaje</h3>
-                        <p>Enviar mensaje</p>
-                    </div>
-                    <div class="endpoint-card">
-                        <h3>POST /api/invitar</h3>
-                        <p>Solicitud de amistad</p>
-                    </div>
-                    <div class="endpoint-card">
-                        <h3>POST /api/seguir</h3>
-                        <p>Seguir usuario</p>
-                    </div>
-                    <div class="endpoint-card">
-                        <h3>POST /api/bloquear</h3>
-                        <p>Bloquear usuario</p>
-                    </div>
+                <h2>🚪 Cerrar Sesión</h2>
+                <button class="btn" onclick="logout()">🚪 Logout</button>
+                <div id="logout-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Profile -->
+            <div class="section">
+                <h2>👤 Ver Perfil</h2>
+                <button class="btn" onclick="getProfile()">👤 Ver Mi Perfil</button>
+                <div id="profile-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Send Message -->
+            <div class="section">
+                <h2>💬 Enviar Mensaje</h2>
+                <div class="input-group">
+                    <label>Chat ID:</label>
+                    <input type="number" id="msg-chat-id" value="1" placeholder="1">
                 </div>
+                <div class="input-group">
+                    <label>Mensaje:</label>
+                    <input type="text" id="msg-text" placeholder="Hola!" value="Hola desde la interfaz de prueba">
+                </div>
+                <button class="btn" onclick="sendMessage()">💬 Enviar Mensaje</button>
+                <div id="message-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Invite to Chat -->
+            <div class="section">
+                <h2>💌 Invitar a Chat</h2>
+                <div class="input-group">
+                    <label>User ID:</label>
+                    <input type="number" id="invite-user-id" value="2" placeholder="2">
+                </div>
+                <button class="btn" onclick="inviteUser()">💌 Invitar</button>
+                <div id="invite-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Follow User -->
+            <div class="section">
+                <h2>👥 Seguir Usuario</h2>
+                <div class="input-group">
+                    <label>User ID:</label>
+                    <input type="number" id="follow-user-id" value="2" placeholder="2">
+                </div>
+                <button class="btn" onclick="followUser()">👥 Seguir</button>
+                <div id="follow-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Block User -->
+            <div class="section">
+                <h2>🚫 Bloquear Usuario</h2>
+                <div class="input-group">
+                    <label>User ID:</label>
+                    <input type="number" id="block-user-id" value="2" placeholder="2">
+                </div>
+                <button class="btn" onclick="blockUser()">🚫 Bloquear</button>
+                <button class="btn" onclick="unblockUser()">✅ Desbloquear</button>
+                <div id="block-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Private Chats -->
+            <div class="section">
+                <h2>💬 Chats Privados</h2>
+                <button class="btn" onclick="getPrivateChats()">📋 Listar Mis Chats Privados</button>
+                <div id="private-chats-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Private Chat Actions -->
+            <div class="section">
+                <h2>🔄 Acciones de Chat Privado</h2>
+                <div class="input-group">
+                    <label>Chat ID:</label>
+                    <input type="number" id="private-chat-id" value="2" placeholder="2">
+                </div>
+                <button class="btn" onclick="changePrivateChat()">🔄 Cambiar a este Chat</button>
+                <button class="btn" onclick="exitPrivateChat()">🚪 Salir del Chat</button>
+                <div id="private-chat-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Users CRUD -->
+            <div class="section">
+                <h2>👥 Gestión de Usuarios</h2>
+                <button class="btn" onclick="listUsers()">📋 Listar Usuarios</button>
+                <div class="input-group">
+                    <label>User ID (para ver/editar/eliminar):</label>
+                    <input type="number" id="user-id-crud" value="2" placeholder="2">
+                </div>
+                <button class="btn" onclick="getUser()">👁️ Ver Usuario</button>
+                <button class="btn" onclick="deleteUser()">🗑️ Eliminar Usuario</button>
+                <div id="users-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Create User -->
+            <div class="section">
+                <h2>➕ Crear Usuario</h2>
+                <div class="input-group">
+                    <label>Nombre:</label>
+                    <input type="text" id="new-user-name" placeholder="Juan Pérez" value="Usuario Demo">
+                </div>
+                <div class="input-group">
+                    <label>Email:</label>
+                    <input type="email" id="new-user-email" placeholder="juan@example.com" value="demo@example.com">
+                </div>
+                <div class="input-group">
+                    <label>Password:</label>
+                    <input type="password" id="new-user-password" placeholder="password123" value="password123">
+                </div>
+                <button class="btn" onclick="createUser()">➕ Crear Usuario</button>
+                <div id="create-user-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Friendship -->
+            <div class="section">
+                <h2>🤝 Amistades</h2>
+                <button class="btn" onclick="listFriendships()">📋 Ver Mis Amistades</button>
+                <button class="btn" onclick="listPendingRequests()">⏳ Solicitudes Pendientes</button>
+                <div id="friendship-list-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Friend Request -->
+            <div class="section">
+                <h2>🤝 Solicitudes de Amistad</h2>
+                <div class="input-group">
+                    <label>User ID (para solicitar):</label>
+                    <input type="number" id="friend-request-user-id" value="3" placeholder="3">
+                </div>
+                <button class="btn" onclick="sendFriendRequest()">📨 Enviar Solicitud</button>
+                <div class="input-group">
+                    <label>Request ID (para aceptar/rechazar):</label>
+                    <input type="number" id="friend-request-id" value="1" placeholder="1">
+                </div>
+                <button class="btn" onclick="acceptFriendRequest()">✅ Aceptar Solicitud</button>
+                <button class="btn" onclick="rejectFriendRequest()">❌ Rechazar Solicitud</button>
+                <div id="friend-request-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Unfollow -->
+            <div class="section">
+                <h2>👥 Dejar de Seguir</h2>
+                <div class="input-group">
+                    <label>Follow ID (para dejar de seguir):</label>
+                    <input type="number" id="unfollow-id" value="1" placeholder="1">
+                </div>
+                <button class="btn" onclick="unfollowUser()">👋 Dejar de Seguir</button>
+                <div id="unfollow-response" class="response" style="display: none;"></div>
             </div>
         </div>
     </div>
@@ -361,6 +480,560 @@
             } catch (error) {
                 document.getElementById('update-response').textContent = 'Error: ' + error.message;
                 document.getElementById('update-response').style.display = 'block';
+            }
+        }
+
+        async function logout() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('logout-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.data) {
+                    token = null;
+                    alert('✅ Sesión cerrada');
+                }
+            } catch (error) {
+                document.getElementById('logout-response').textContent = 'Error: ' + error.message;
+                document.getElementById('logout-response').style.display = 'block';
+            }
+        }
+
+        async function getProfile() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/perfil`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('profile-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('profile-response').textContent = 'Error: ' + error.message;
+                document.getElementById('profile-response').style.display = 'block';
+            }
+        }
+
+        async function sendMessage() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const chatId = parseInt(document.getElementById('msg-chat-id').value);
+            const text = document.getElementById('msg-text').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/mensaje?chat_id=${chatId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('message-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('message-response').textContent = 'Error: ' + error.message;
+                document.getElementById('message-response').style.display = 'block';
+            }
+        }
+
+        async function inviteUser() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const userId = parseInt(document.getElementById('invite-user-id').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/invitar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('invite-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('invite-response').textContent = 'Error: ' + error.message;
+                document.getElementById('invite-response').style.display = 'block';
+            }
+        }
+
+        async function followUser() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const userId = parseInt(document.getElementById('follow-user-id').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/seguir`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('follow-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('follow-response').textContent = 'Error: ' + error.message;
+                document.getElementById('follow-response').style.display = 'block';
+            }
+        }
+
+        async function blockUser() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const userId = parseInt(document.getElementById('block-user-id').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/bloquear`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('block-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('block-response').textContent = 'Error: ' + error.message;
+                document.getElementById('block-response').style.display = 'block';
+            }
+        }
+
+        async function unblockUser() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const blockId = parseInt(document.getElementById('block-user-id').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/bloquear/${blockId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('block-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('block-response').textContent = 'Error: ' + error.message;
+                document.getElementById('block-response').style.display = 'block';
+            }
+        }
+
+        async function getPrivateChats() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/privado`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('private-chats-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('private-chats-response').textContent = 'Error: ' + error.message;
+                document.getElementById('private-chats-response').style.display = 'block';
+            }
+        }
+
+        async function changePrivateChat() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const chatId = parseInt(document.getElementById('private-chat-id').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/privado/cambiar/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    },
+                    body: JSON.stringify({ chat_id: chatId })
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('private-chat-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('private-chat-response').textContent = 'Error: ' + error.message;
+                document.getElementById('private-chat-response').style.display = 'block';
+            }
+        }
+
+        async function exitPrivateChat() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const chatId = parseInt(document.getElementById('private-chat-id').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/privado/salir`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    },
+                    body: JSON.stringify({ chat_id: chatId })
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('private-chat-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('private-chat-response').textContent = 'Error: ' + error.message;
+                document.getElementById('private-chat-response').style.display = 'block';
+            }
+        }
+
+        async function listUsers() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/usuarios`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('users-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('users-response').textContent = 'Error: ' + error.message;
+                document.getElementById('users-response').style.display = 'block';
+            }
+        }
+
+        async function getUser() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const userId = parseInt(document.getElementById('user-id-crud').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/usuarios/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('users-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('users-response').textContent = 'Error: ' + error.message;
+                document.getElementById('users-response').style.display = 'block';
+            }
+        }
+
+        async function deleteUser() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const userId = parseInt(document.getElementById('user-id-crud').value);
+
+            if (!confirm(`¿Seguro que quieres eliminar el usuario ${userId}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/usuarios/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('users-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('users-response').textContent = 'Error: ' + error.message;
+                document.getElementById('users-response').style.display = 'block';
+            }
+        }
+
+        async function createUser() {
+            const name = document.getElementById('new-user-name').value;
+            const email = document.getElementById('new-user-email').value;
+            const password = document.getElementById('new-user-password').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/usuarios`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-KEY': API_KEY
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('create-user-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('create-user-response').textContent = 'Error: ' + error.message;
+                document.getElementById('create-user-response').style.display = 'block';
+            }
+        }
+
+        async function listFriendships() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/amistad`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('friendship-list-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('friendship-list-response').textContent = 'Error: ' + error.message;
+                document.getElementById('friendship-list-response').style.display = 'block';
+            }
+        }
+
+        async function listPendingRequests() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/amistad/pendientes`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('friendship-list-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('friendship-list-response').textContent = 'Error: ' + error.message;
+                document.getElementById('friendship-list-response').style.display = 'block';
+            }
+        }
+
+        async function sendFriendRequest() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const userId = parseInt(document.getElementById('friend-request-user-id').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/amistad/solicitar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('friend-request-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('friend-request-response').textContent = 'Error: ' + error.message;
+                document.getElementById('friend-request-response').style.display = 'block';
+            }
+        }
+
+        async function acceptFriendRequest() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const requestId = parseInt(document.getElementById('friend-request-id').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/amistad/aceptar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    },
+                    body: JSON.stringify({ request_id: requestId })
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('friend-request-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('friend-request-response').textContent = 'Error: ' + error.message;
+                document.getElementById('friend-request-response').style.display = 'block';
+            }
+        }
+
+        async function rejectFriendRequest() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const requestId = parseInt(document.getElementById('friend-request-id').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/amistad/rechazar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    },
+                    body: JSON.stringify({ request_id: requestId })
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('friend-request-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('friend-request-response').textContent = 'Error: ' + error.message;
+                document.getElementById('friend-request-response').style.display = 'block';
+            }
+        }
+
+        async function unfollowUser() {
+            if (!token) {
+                alert('⚠️ Primero debes hacer login');
+                return;
+            }
+
+            const followId = parseInt(document.getElementById('unfollow-id').value);
+
+            try {
+                const response = await fetch(`${API_URL}/api/seguir/${followId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-API-KEY': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                const responseEl = document.getElementById('unfollow-response');
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('unfollow-response').textContent = 'Error: ' + error.message;
+                document.getElementById('unfollow-response').style.display = 'block';
             }
         }
 

@@ -332,7 +332,7 @@ Authorization: Bearer <token>
         "id": 1,
         "user_id": 1,
         "user_name": "User One",
-        "text": "Hello everyone!",
+        "text": "¡Hola a todos!",
         "created_at": "2026-01-29 10:30:45"
       }
     ]
@@ -356,14 +356,14 @@ Authorization: Bearer <token>
         "id": 1,
         "user_id": 1,
         "user_name": "User One",
-        "text": "Hello everyone!",
+        "text": "¡Hola a todos!",
         "created_at": "2026-02-22 10:30:45"
       },
       {
         "id": 2,
         "user_id": 2,
         "user_name": "User Two",
-        "text": "Hi there!",
+        "text": "¡Hola!",
         "created_at": "2026-02-22 10:31:12"
       }
     ]

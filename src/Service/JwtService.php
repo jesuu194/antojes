@@ -8,6 +8,7 @@ use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 use Lcobucci\JWT\Token\Plain;
+use Lcobucci\Clock\SystemClock;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class JwtService
@@ -28,6 +29,7 @@ class JwtService
         $now = new \DateTimeImmutable();
         $token = $this->config->builder()
             ->issuedAt($now)
+            ->canOnlyBeUsedAfter($now)
             ->expiresAt($now->modify('+1 hour'))
             ->withClaim('user_id', $payload['user_id'])
             ->withClaim('email', $payload['email'])
@@ -42,12 +44,13 @@ class JwtService
             $parsedToken = $this->config->parser()->parse($token);
             
             if (!$parsedToken instanceof Plain) {
+                error_log("Token is not a Plain instance");
                 return null;
             }
             
             $constraints = [
                 new SignedWith($this->config->signer(), $this->config->signingKey()),
-                new StrictValidAt(new \DateTimeImmutable()),
+                new StrictValidAt(SystemClock::fromUTC()),
             ];
 
             $this->config->validator()->assert($parsedToken, ...$constraints);
@@ -57,6 +60,8 @@ class JwtService
                 'email' => $parsedToken->claims()->get('email'),
             ];
         } catch (\Exception $e) {
+            error_log("Token validation error: " . $e->getMessage());
+            error_log("Token: " . substr($token, 0, 50) . "...");
             return null;
         }
     }

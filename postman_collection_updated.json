@@ -1,25 +1,27 @@
 {
   "info": {
-    "_postman_id": "antojes-api-collection",
-    "name": "Antojes API - Chat Geolocalizado (Actualizado)",
-    "description": "Colección completa de endpoints para la API REST del chat geolocalizado. Usa las variables de entorno: baseUrl (http://localhost:8000/api) y apiKey (test-api-key)",
+    "_postman_id": "antojes-api-2026",
+    "name": "Antojes API - Completa 2026",
+    "description": "Colección completa actualizada de todos los endpoints. Importa este archivo en Postman.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8000/api",
-      "type": "string"
+      "value": "http://localhost:8000/api"
     },
     {
       "key": "apiKey",
-      "value": "test-api-key",
-      "type": "string"
+      "value": "test-api-key"
+    },
+    {
+      "key": "token",
+      "value": ""
     }
   ],
   "item": [
     {
-      "name": "Autenticación",
+      "name": "1. Autenticación",
       "item": [
         {
           "name": "Login",
@@ -29,9 +31,11 @@
               "script": {
                 "exec": [
                   "if (pm.response.code === 200) {",
-                  "  var jsonData = pm.response.json();",
-                  "  pm.environment.set('token', jsonData.token);",
-                  "  pm.environment.set('userId', jsonData.user.id);",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set('token', jsonData.data.token);",
+                  "        console.log('Token guardado:', jsonData.data.token);",
+                  "    }",
                   "}"
                 ]
               }
@@ -51,12 +55,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"password\"\n}"
+              "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/login",
               "host": ["{{baseUrl}}"],
-              "path": ["/login"]
+              "path": ["login"]
             }
           }
         },
@@ -77,139 +81,17 @@
             "url": {
               "raw": "{{baseUrl}}/logout",
               "host": ["{{baseUrl}}"],
-              "path": ["/logout"]
+              "path": ["logout"]
             }
           }
         }
       ]
     },
     {
-      "name": "Usuarios",
+      "name": "2. Información General",
       "item": [
         {
-          "name": "Crear usuario",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Nuevo Usuario\",\n  \"email\": \"nuevo@example.com\",\n  \"password\": \"password123\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/usuarios",
-              "host": ["{{baseUrl}}"],
-              "path": ["/usuarios"]
-            }
-          }
-        },
-        {
-          "name": "Listar usuarios",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/usuarios",
-              "host": ["{{baseUrl}}"],
-              "path": ["/usuarios"]
-            }
-          }
-        },
-        {
-          "name": "Obtener usuario",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/usuarios/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["/usuarios", "1"]
-            }
-          }
-        },
-        {
-          "name": "Actualizar usuario",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Nombre actualizado\",\n  \"email\": \"newemail@example.com\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/usuarios/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["/usuarios", "1"]
-            }
-          }
-        },
-        {
-          "name": "Eliminar usuario",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/usuarios/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["/usuarios", "1"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Ubicación y Perfil",
-      "item": [
-        {
-          "name": "Home",
+          "name": "Home (Usuarios Cercanos)",
           "request": {
             "method": "GET",
             "header": [
@@ -225,67 +107,12 @@
             "url": {
               "raw": "{{baseUrl}}/home",
               "host": ["{{baseUrl}}"],
-              "path": ["/home"]
+              "path": ["home"]
             }
           }
         },
         {
-          "name": "Perfil",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/perfil",
-              "host": ["{{baseUrl}}"],
-              "path": ["/perfil"]
-            }
-          }
-        },
-        {
-          "name": "Actualizar ubicación",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"lat\": \"40.7150\",\n  \"lng\": \"-74.0100\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/actualizar",
-              "host": ["{{baseUrl}}"],
-              "path": ["/actualizar"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Chat General",
-      "item": [
-        {
-          "name": "Obtener chat general",
+          "name": "Chat General",
           "request": {
             "method": "GET",
             "header": [
@@ -301,47 +128,12 @@
             "url": {
               "raw": "{{baseUrl}}/general",
               "host": ["{{baseUrl}}"],
-              "path": ["/general"]
+              "path": ["general"]
             }
           }
         },
         {
-          "name": "Enviar mensaje al general",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"text\": \"¡Hola a todos!\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/mensaje?chat_id=1",
-              "host": ["{{baseUrl}}"],
-              "path": ["/mensaje"],
-              "query": [
-                {
-                  "key": "chat_id",
-                  "value": "1"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Obtener mensajes del general",
+          "name": "Mi Perfil",
           "request": {
             "method": "GET",
             "header": [
@@ -355,38 +147,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/mensaje?chat_id=1",
+              "raw": "{{baseUrl}}/perfil",
               "host": ["{{baseUrl}}"],
-              "path": ["/mensaje"],
-              "query": [
-                {
-                  "key": "chat_id",
-                  "value": "1"
-                }
-              ]
+              "path": ["perfil"]
             }
           }
-        }
-      ]
-    },
-    {
-      "name": "Chats Privados",
-      "item": [
+        },
         {
-          "name": "Invitar / crear chat privado",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 201 || pm.response.code === 200) {",
-                  "  var jsonData = pm.response.json();",
-                  "  pm.environment.set('privateChatId', jsonData.chat.id);",
-                  "}"
-                ]
-              }
-            }
-          ],
+          "name": "Actualizar Ubicación",
           "request": {
             "method": "POST",
             "header": [
@@ -405,17 +173,167 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": 2\n}"
+              "raw": "{\n    \"lat\": 39.4699,\n    \"lng\": -0.3763,\n    \"online\": true\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/invitar",
+              "raw": "{{baseUrl}}/actualizar",
               "host": ["{{baseUrl}}"],
-              "path": ["/invitar"]
+              "path": ["actualizar"]
             }
           }
         },
         {
-          "name": "Listar chats privados",
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Usuarios (CRUD)",
+      "item": [
+        {
+          "name": "Crear Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Usuario Postman\",\n    \"email\": \"postman@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Listar Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Ver Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/2",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios", "2"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/22",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios", "22"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Mensajes y Chats",
+      "item": [
+        {
+          "name": "Enviar Mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"text\": \"Mensaje enviado desde Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mensaje?chat_id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["mensaje"],
+              "query": [
+                {
+                  "key": "chat_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ver Chats Privados",
           "request": {
             "method": "GET",
             "header": [
@@ -431,12 +349,12 @@
             "url": {
               "raw": "{{baseUrl}}/privado",
               "host": ["{{baseUrl}}"],
-              "path": ["/privado"]
+              "path": ["privado"]
             }
           }
         },
         {
-          "name": "Cambiar chat activo",
+          "name": "Cambiar Chat Privado",
           "request": {
             "method": "POST",
             "header": [
@@ -455,17 +373,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"chat_id\": {{privateChatId}}\n}"
+              "raw": "{\n    \"chat_id\": 2\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/privado/cambiar/chat",
               "host": ["{{baseUrl}}"],
-              "path": ["/privado", "cambiar", "chat"]
+              "path": ["privado", "cambiar", "chat"]
             }
           }
         },
         {
-          "name": "Salir del chat privado",
+          "name": "Salir de Chat Privado",
           "request": {
             "method": "POST",
             "header": [
@@ -484,209 +402,51 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"chat_id\": {{privateChatId}}\n}"
+              "raw": "{\n    \"chat_id\": 2\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/privado/salir",
               "host": ["{{baseUrl}}"],
-              "path": ["/privado", "salir"]
+              "path": ["privado", "salir"]
+            }
+          }
+        },
+        {
+          "name": "Invitar a Chat Privado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invitar",
+              "host": ["{{baseUrl}}"],
+              "path": ["invitar"]
             }
           }
         }
       ]
     },
     {
-      "name": "Sociales",
+      "name": "5. Amistades",
       "item": [
         {
-          "name": "Bloquear usuario",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"user_id\": 4\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/bloquear",
-              "host": ["{{baseUrl}}"],
-              "path": ["/bloquear"]
-            }
-          }
-        },
-        {
-          "name": "Desbloquear usuario",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/bloquear/4",
-              "host": ["{{baseUrl}}"],
-              "path": ["/bloquear", "4"]
-            }
-          }
-        },
-        {
-          "name": "Seguir usuario",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"user_id\": 3\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/seguir",
-              "host": ["{{baseUrl}}"],
-              "path": ["/seguir"]
-            }
-          }
-        },
-        {
-          "name": "Dejar de seguir",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/seguir/3",
-              "host": ["{{baseUrl}}"],
-              "path": ["/seguir", "3"]
-            }
-          }
-        },
-        {
-          "name": "Solicitar amistad",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"user_id\": 4\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/amistad/solicitar",
-              "host": ["{{baseUrl}}"],
-              "path": ["/amistad", "solicitar"]
-            }
-          }
-        },
-        {
-          "name": "Aceptar solicitud",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"request_id\": 1\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/amistad/aceptar",
-              "host": ["{{baseUrl}}"],
-              "path": ["/amistad", "aceptar"]
-            }
-          }
-        },
-        {
-          "name": "Rechazar solicitud",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "X-API-KEY",
-                "value": "{{apiKey}}"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"request_id\": 1\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/amistad/rechazar",
-              "host": ["{{baseUrl}}"],
-              "path": ["/amistad", "rechazar"]
-            }
-          }
-        },
-        {
-          "name": "Listar amigos",
+          "name": "Ver Mis Amistades",
           "request": {
             "method": "GET",
             "header": [
@@ -702,33 +462,224 @@
             "url": {
               "raw": "{{baseUrl}}/amistad",
               "host": ["{{baseUrl}}"],
-              "path": ["/amistad"]
+              "path": ["amistad"]
+            }
+          }
+        },
+        {
+          "name": "Solicitudes Pendientes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/amistad/pendientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["amistad", "pendientes"]
+            }
+          }
+        },
+        {
+          "name": "Enviar Solicitud de Amistad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/amistad/solicitar",
+              "host": ["{{baseUrl}}"],
+              "path": ["amistad", "solicitar"]
+            }
+          }
+        },
+        {
+          "name": "Aceptar Solicitud",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"request_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/amistad/aceptar",
+              "host": ["{{baseUrl}}"],
+              "path": ["amistad", "aceptar"]
+            }
+          }
+        },
+        {
+          "name": "Rechazar Solicitud",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"request_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/amistad/rechazar",
+              "host": ["{{baseUrl}}"],
+              "path": ["amistad", "rechazar"]
             }
           }
         }
       ]
-    }
-  ],
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8000/api"
     },
     {
-      "key": "apiKey",
-      "value": "test-api-key"
-    },
-    {
-      "key": "token",
-      "value": ""
-    },
-    {
-      "key": "userId",
-      "value": ""
-    },
-    {
-      "key": "privateChatId",
-      "value": ""
+      "name": "6. Seguir/Bloquear",
+      "item": [
+        {
+          "name": "Seguir Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seguir",
+              "host": ["{{baseUrl}}"],
+              "path": ["seguir"]
+            }
+          }
+        },
+        {
+          "name": "Dejar de Seguir",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/seguir/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["seguir", "1"]
+            }
+          }
+        },
+        {
+          "name": "Bloquear Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bloquear",
+              "host": ["{{baseUrl}}"],
+              "path": ["bloquear"]
+            }
+          }
+        },
+        {
+          "name": "Desbloquear Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bloquear/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["bloquear", "1"]
+            }
+          }
+        }
+      ]
     }
   ]
 }

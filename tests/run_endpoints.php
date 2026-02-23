@@ -99,7 +99,7 @@ $tests[] = ['method'=>'POST','path'=>'/api/usuarios','auth'=>false,'body'=>['nam
 
 // messaging
 if ($generalChatId) {
-    $tests[] = ['method'=>'POST','path'=>'/api/mensaje?chat_id=' . $generalChatId,'auth'=>true,'body'=>['text'=>'Script test message']];
+    $tests[] = ['method'=>'POST','path'=>'/api/mensaje?chat_id=' . $generalChatId,'auth'=>true,'body'=>['text'=>'Mensaje de prueba del script']];
     $tests[] = ['method'=>'GET','path'=>'/api/mensaje?chat_id=' . $generalChatId,'auth'=>true];
 }
 

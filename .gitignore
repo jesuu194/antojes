@@ -8,3 +8,9 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+###> custom excludes ###
+token.txt
+test_*.ps1
+*.bat
+show_db.php
+###< custom excludes ###
