@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: chat-geolocalizado-api
+    name: antojes-api
     runtime: docker
     plan: free
     envVars:
@@ -16,9 +16,9 @@ services:
         value: 127.0.0.1,REMOTE_ADDR
       - key: DATABASE_URL
         fromDatabase:
-          name: psql-postgres
+          name: antojes-db
           property: connectionString
 
 databases:
-  - name: psql-postgres
+  - name: antojes-db
     plan: free
