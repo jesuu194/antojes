@@ -945,3 +945,100 @@ Valida `X-API-KEY` en todas las rutas `/api` automáticamente
 **Última actualización:** 22/02/2026  
 **Servidor Local:** http://localhost:8000  
 **Interfaz Web:** http://localhost:8000/index.html
+
+---
+
+## 📁 Gestión del Proyecto
+
+### 1. Iniciación y Planificación del Proyecto
+
+Es la parte más creativa del proceso: como un folio en blanco donde se esbozan las partes del proyecto y de donde emerge una idea clara sobre qué será el producto final.
+
+- **Definición del Alcance:** Identificar las necesidades del cliente y establecer los objetivos y límites del proyecto. Un proyecto sin límites no sería abordable porque no terminaría nunca. Hay que modularlo para que sea factible.
+- **Análisis de Viabilidad:** Técnica y económica. La parte técnica indica qué es posible hacer con las herramientas actuales; la económica incluye costes de servidores, dominios y licencias, así como el esfuerzo humano traducido a precio/hora.
+- **Planificación Temporal:** Creación de diagramas de Gantt, hitos y cronogramas.
+- **Asignación de Recursos y Roles:** Aunque sea un proyecto pequeño, puede ser necesario repartir las tareas de manera clara y temporizada entre los miembros del equipo.
+- **Elaboración del Documento de Especificación de Requisitos:** Recoge todo lo que la aplicación debe hacer y lo que se espera de ella. De este documento suele derivarse el presupuesto del proyecto.
+
+En este proyecto, el alcance quedó definido como una **API REST de chat geolocalizado** con autenticación JWT, gestión de usuarios, chats privados y generales, seguimientos y bloqueos — descartando explícitamente funcionalidades en tiempo real (WebSockets) para mantener el scope factible.
+
+---
+
+### 2. Análisis y Diseño
+
+El análisis afecta tanto a los datos que va a manejar la aplicación como a la tecnología a utilizar. Es fundamental para no estar "dando palos de ciego" y evitar cambios costosos en tiempo y dinero.
+
+#### Diseño de la Base de Datos
+
+Modelo Entidad-Relación (ER) y modelo relacional. Definición de tablas, claves, relaciones y normalización.
+
+| Entidad | Descripción |
+|---|---|
+| `user` | Usuarios con geolocalización (lat/lon) |
+| `chat` | Salas de chat (tipo: general / privado) |
+| `chat_member` | Relación usuario-sala |
+| `message` | Mensajes con timestamp y contenido |
+| `user_block` | Relaciones de bloqueo entre usuarios |
+| `user_follow` | Relaciones de seguimiento |
+| `friend_request` | Solicitudes de amistad con estado |
+
+#### Diseño Técnico
+
+- **Arquitectura:** API REST (sin vistas servidor) con separación total Backend / Frontend.
+- **Stack tecnológico:**
+  - Backend: **Symfony 7.2 / PHP 8.2** con Doctrine ORM 3.6
+  - Base de datos: **MySQL 8.0** (local) / **PostgreSQL** (producción)
+  - Autenticación: **API Key** (cabecera `X-API-KEY`) + **JWT** (`lcobucci/jwt 4.0`)
+  - Frontend: HTML/CSS/JavaScript vanilla consumiendo la API
+- **Seguridad:** Doble capa con API Key global y JWT por usuario. CORS gestionado mediante `CorsSubscriber`.
+- **Diseño de la API:** Endpoints RESTful documentados en este mismo documento, con respuestas en formato JSON estandarizado `{data, error}`.
+
+---
+
+### 3. Implementación (Desarrollo)
+
+Tras el diseño, se configuró el entorno de desarrollo local con **XAMPP** (Apache + MySQL), **Composer** como gestor de dependencias PHP, y **Git** para control de versiones.
+
+#### Backend (Symfony)
+
+- Modelos (Entidades Doctrine): `src/Entity/`
+- Controladores con lógica de negocio: `src/Controller/`
+- Repositorios con consultas DQL/nativas: `src/Repository/`
+- Servicios reutilizables (JWT, utilidades): `src/Service/`
+- Autenticación y autorización: `src/Security/` + `src/EventSubscriber/`
+- Migraciones de base de datos: `migrations/`
+
+#### Frontend
+
+- Maquetación con HTML/CSS y Bootstrap: `public/*.html`
+- Interactividad con JavaScript vanilla: consumo de la API REST
+- Interfaz de pruebas integrada: `public/index.html`, `public/docs.html`
+
+#### Integración Backend–Frontend
+
+La comunicación se verificó mediante **Postman** (colecciones incluidas en `postman_collection.json`) y los scripts de prueba automatizados disponibles en `test_api.ps1` y `test_all_endpoints.ps1`.
+
+---
+
+### 4. Pruebas (Testing) y Control de Calidad
+
+- **Pruebas Unitarias:** Validación aislada de servicios como `JwtService` y lógica de negocio de los controladores.
+- **Pruebas de Integración:** Verificación de la comunicación entre controladores, repositorios y base de datos mediante solicitudes HTTP reales.
+- **Pruebas de Aceptación:** Los endpoints fueron probados contra los requisitos funcionales definidos (ver `TEST_RESULTS.md`).
+- **Resolución de Errores:** Depuración con el perfilador de Symfony (`/_profiler`) en entorno `dev` y logs en `var/log/`.
+
+Los resultados de las pruebas están documentados en [TEST_RESULTS.md](TEST_RESULTS.md).
+
+---
+
+### 5. Despliegue (Deployment) y Puesta en Producción
+
+La puesta en producción traslada el proyecto local a un entorno accesible para todos los usuarios.
+
+- **Preparación del Entorno:** Configuración de servidor web (Apache/Nginx), base de datos PostgreSQL en la nube y variables de entorno de producción (`APP_ENV=prod`, `APP_DEBUG=0`).
+- **Plataformas soportadas:**
+  - **Railway** (recomendado): despliegue automático desde GitHub con `railway.toml`
+  - **Render**: despliegue mediante `render.yaml` con Blueprint
+  - **Fly.io**: configuración en `fly.toml`
+- **Dominio y SSL:** Las plataformas Railway/Render proporcionan subdominios con certificado SSL/TLS automático mediante Let's Encrypt.
+- **Documentación de Despliegue:** Instrucciones detalladas disponibles en [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md), [RAILWAY_SIMPLE.md](RAILWAY_SIMPLE.md) y [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md).
