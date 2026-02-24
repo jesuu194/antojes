@@ -954,91 +954,118 @@ Valida `X-API-KEY` en todas las rutas `/api` automáticamente
 
 Es la parte más creativa del proceso: como un folio en blanco donde se esbozan las partes del proyecto y de donde emerge una idea clara sobre qué será el producto final.
 
-- **Definición del Alcance:** Identificar las necesidades del cliente y establecer los objetivos y límites del proyecto. Un proyecto sin límites no sería abordable porque no terminaría nunca. Hay que modularlo para que sea factible.
-- **Análisis de Viabilidad:** Técnica y económica. La parte técnica indica qué es posible hacer con las herramientas actuales; la económica incluye costes de servidores, dominios y licencias, así como el esfuerzo humano traducido a precio/hora.
-- **Planificación Temporal:** Creación de diagramas de Gantt, hitos y cronogramas.
-- **Asignación de Recursos y Roles:** Aunque sea un proyecto pequeño, puede ser necesario repartir las tareas de manera clara y temporizada entre los miembros del equipo.
-- **Elaboración del Documento de Especificación de Requisitos:** Recoge todo lo que la aplicación debe hacer y lo que se espera de ella. De este documento suele derivarse el presupuesto del proyecto.
-
-En este proyecto, el alcance quedó definido como una **API REST de chat geolocalizado** con autenticación JWT, gestión de usuarios, chats privados y generales, seguimientos y bloqueos — descartando explícitamente funcionalidades en tiempo real (WebSockets) para mantener el scope factible.
+- **Definición del Alcance:** La necesidad de partida era disponer de una red social de chat donde los usuarios solo puedan comunicarse con personas físicamente cercanas (radio de 5 km), sin exponer datos de ubicación exacta. El proyecto se acotó a una **API REST** consumible desde cualquier cliente, dejando fuera del alcance inicial funcionalidades como notificaciones push o mensajería en tiempo real (WebSockets/Mercure), que quedan recogidas como mejoras futuras.
+- **Análisis de Viabilidad:** Técnicamente viable con herramientas open-source (Symfony, Doctrine, MySQL/PostgreSQL) sin coste de licencias. El coste económico se limita al hosting: las plataformas Railway y Render ofrecen tier gratuito suficiente para un proyecto académico, sin necesidad de dominio propio (se usan los subdominios `*.railway.app` / `*.onrender.com`).
+- **Planificación Temporal:** El desarrollo se organizó en tres fases: (1) modelado de la base de datos y entidades, (2) implementación de controladores y seguridad, (3) pruebas y despliegue.
+- **Asignación de Recursos y Roles:** Proyecto individual. El desarrollador asumió todos los roles: análisis, backend, frontend, pruebas y despliegue.
+- **Especificación de Requisitos principales:**
+  - Los usuarios deben poder registrarse, autenticarse y actualizar su posición GPS.
+  - Solo deben ver y chatear con usuarios en un radio de 5 km.
+  - Debe existir un chat general y chats privados entre dos usuarios.
+  - Los usuarios pueden seguirse, enviar solicitudes de amistad y bloquearse entre sí.
+  - Toda comunicación con la API debe estar protegida por API Key y JWT.
 
 ---
 
 ### 2. Análisis y Diseño
 
-El análisis afecta tanto a los datos que va a manejar la aplicación como a la tecnología a utilizar. Es fundamental para no estar "dando palos de ciego" y evitar cambios costosos en tiempo y dinero.
-
 #### Diseño de la Base de Datos
 
-Modelo Entidad-Relación (ER) y modelo relacional. Definición de tablas, claves, relaciones y normalización.
+Se definieron 7 entidades Doctrine que mapean directamente a las tablas de la base de datos:
 
-| Entidad | Descripción |
-|---|---|
-| `user` | Usuarios con geolocalización (lat/lon) |
-| `chat` | Salas de chat (tipo: general / privado) |
-| `chat_member` | Relación usuario-sala |
-| `message` | Mensajes con timestamp y contenido |
-| `user_block` | Relaciones de bloqueo entre usuarios |
-| `user_follow` | Relaciones de seguimiento |
-| `friend_request` | Solicitudes de amistad con estado |
+| Tabla | Campos principales | Relaciones |
+|---|---|---|
+| `user` | `id`, `name`, `email`, `password`, `lat`, `lng`, `online`, `createdAt` | — |
+| `chat` | `id`, `type` (`general`/`private`), `isActive`, `createdAt` | — |
+| `chat_member` | `id`, `chat_id`, `user_id` | ManyToOne → `chat`, `user` |
+| `message` | `id`, `text`, `createdAt`, `chat_id`, `user_id` | ManyToOne → `chat`, `user` |
+| `user_block` | `id`, `blocker_id`, `blocked_id`, `createdAt` | ManyToOne → `user` (×2) |
+| `user_follow` | `id`, `follower_id`, `followed_id`, `createdAt` | ManyToOne → `user` (×2) |
+| `friend_request` | `id`, `senderUser_id`, `receiverUser_id`, `status`, `createdAt`, `respondedAt` | ManyToOne → `user` (×2) |
+
+El campo `status` de `friend_request` puede tomar los valores: `pending`, `accepted`, `rejected` o `cancelled`.  
+Los campos `lat` y `lng` de `user` son `decimal(10,8)` y `decimal(11,8)` respectivamente, con precisión suficiente para cálculos de distancia geodésica.
 
 #### Diseño Técnico
 
-- **Arquitectura:** API REST (sin vistas servidor) con separación total Backend / Frontend.
+- **Arquitectura:** API REST pura (sin renderizado de vistas en servidor). El backend expone únicamente endpoints JSON; el frontend es estático en `public/`.
 - **Stack tecnológico:**
-  - Backend: **Symfony 7.2 / PHP 8.2** con Doctrine ORM 3.6
-  - Base de datos: **MySQL 8.0** (local) / **PostgreSQL** (producción)
-  - Autenticación: **API Key** (cabecera `X-API-KEY`) + **JWT** (`lcobucci/jwt 4.0`)
-  - Frontend: HTML/CSS/JavaScript vanilla consumiendo la API
-- **Seguridad:** Doble capa con API Key global y JWT por usuario. CORS gestionado mediante `CorsSubscriber`.
-- **Diseño de la API:** Endpoints RESTful documentados en este mismo documento, con respuestas en formato JSON estandarizado `{data, error}`.
+  - Backend: **Symfony 7.2 / PHP ≥8.2** — framework MVC usado solo en su capa de controladores y servicios
+  - ORM: **Doctrine ORM 3.6** con migraciones gestionadas por `doctrine-migrations-bundle`
+  - Base de datos: **MySQL 8.0** en local (XAMPP) / **PostgreSQL** en producción (Railway/Render)
+  - Autenticación: capa doble — `ApiKeySubscriber` valida el header `X-API-KEY` en todas las rutas `/api`; `JwtService` (basado en `lcobucci/jwt 4.0`) emite y valida tokens Bearer con duración de 1 hora
+  - Frontend: HTML/CSS/JavaScript vanilla en `public/` — sin framework, consume la API con `fetch()`
+- **Seguridad:**
+  - `CorsSubscriber` gestiona las cabeceras CORS para permitir peticiones desde cualquier origen en desarrollo.
+  - `JwtAuthenticator` en `src/Security/` extrae el `user_id` del token y lo inyecta en el contexto de seguridad de Symfony.
+  - Las contraseñas se almacenan con hash mediante `PasswordHasherInterface` de Symfony.
+- **Cálculo de proximidad:** `HomeController` filtra usuarios usando la fórmula de Haversine aplicada sobre los campos `lat`/`lng` de la entidad `User`, devolviendo solo aquellos en un radio de 5 km.
+- **Diseño de la API:** Todos los endpoints siguen el patrón `{data, error}`. Los métodos HTTP, rutas y cuerpos de petición/respuesta están documentados exhaustivamente en las secciones anteriores de este documento.
 
 ---
 
 ### 3. Implementación (Desarrollo)
 
-Tras el diseño, se configuró el entorno de desarrollo local con **XAMPP** (Apache + MySQL), **Composer** como gestor de dependencias PHP, y **Git** para control de versiones.
+El entorno de desarrollo local se configuró con **XAMPP** (Apache + MySQL 8.0), **Composer** como gestor de dependencias PHP, y **Git** para control de versiones.
 
-#### Backend (Symfony)
+#### Backend — Symfony
 
-- Modelos (Entidades Doctrine): `src/Entity/`
-- Controladores con lógica de negocio: `src/Controller/`
-- Repositorios con consultas DQL/nativas: `src/Repository/`
-- Servicios reutilizables (JWT, utilidades): `src/Service/`
-- Autenticación y autorización: `src/Security/` + `src/EventSubscriber/`
-- Migraciones de base de datos: `migrations/`
+El backend se organiza siguiendo la estructura estándar de Symfony:
+
+| Carpeta | Contenido |
+|---|---|
+| `src/Entity/` | 7 entidades Doctrine: `User`, `Chat`, `ChatMember`, `Message`, `UserBlock`, `UserFollow`, `FriendRequest` |
+| `src/Controller/` | 19 controladores REST: `LoginController`, `LogoutController`, `HomeController`, `UpdateController`, `GeneralController`, `GeneralMessageController`, `PrivateController`, `PrivateChatController`, `MessageController`, `UserController`, `ProfileController`, `FollowController`, `FriendshipController`, `BlockController`, `InviteController`, `ConfigController`, `HealthController`, `DebugController`, `ApiDocController` |
+| `src/Repository/` | Repositorios Doctrine con consultas DQL para cada entidad |
+| `src/Service/` | `JwtService` — generación y validación de tokens JWT con `lcobucci/jwt` |
+| `src/Security/` | `JwtAuthenticator` — autenticador de Symfony basado en token Bearer |
+| `src/EventSubscriber/` | `ApiKeySubscriber` (valida `X-API-KEY`), `CorsSubscriber` (cabeceras CORS) |
+| `migrations/` | Migraciones de esquema generadas con `doctrine:migrations:diff` |
+| `src/DataFixtures/` | `AppFixtures` — 21 usuarios de prueba geolocalizados en Valencia |
 
 #### Frontend
 
-- Maquetación con HTML/CSS y Bootstrap: `public/*.html`
-- Interactividad con JavaScript vanilla: consumo de la API REST
-- Interfaz de pruebas integrada: `public/index.html`, `public/docs.html`
+- Interfaz de usuario en `public/index.html` — permite probar todos los endpoints desde el navegador
+- Documentación interactiva en `public/docs.html` y `public/endpoints.html`
+- Toda la interactividad se implementa con JavaScript vanilla usando `fetch()` contra los endpoints de la propia API
 
 #### Integración Backend–Frontend
 
-La comunicación se verificó mediante **Postman** (colecciones incluidas en `postman_collection.json`) y los scripts de prueba automatizados disponibles en `test_api.ps1` y `test_all_endpoints.ps1`.
+La comunicación se verificó en dos niveles:
+1. **Postman:** colecciones completas en `postman_collection.json` y `postman_collection_updated.json` con todos los endpoints, variables de entorno y ejemplos de respuesta.
+2. **Scripts automatizados PowerShell:** `test_api.ps1`, `test_all_endpoints.ps1` y `test_endpoints_simple.ps1` ejecutan el flujo completo (login → actualizar ubicación → home → mensajes → privados).
 
 ---
 
 ### 4. Pruebas (Testing) y Control de Calidad
 
-- **Pruebas Unitarias:** Validación aislada de servicios como `JwtService` y lógica de negocio de los controladores.
-- **Pruebas de Integración:** Verificación de la comunicación entre controladores, repositorios y base de datos mediante solicitudes HTTP reales.
-- **Pruebas de Aceptación:** Los endpoints fueron probados contra los requisitos funcionales definidos (ver `TEST_RESULTS.md`).
-- **Resolución de Errores:** Depuración con el perfilador de Symfony (`/_profiler`) en entorno `dev` y logs en `var/log/`.
-
-Los resultados de las pruebas están documentados en [TEST_RESULTS.md](TEST_RESULTS.md).
+- **Pruebas Unitarias:** Se probó de forma aislada `JwtService`: generación de token con claims `user_id` y `email`, validación de firma, y expiración a 1 hora. También se verificaron los métodos de cálculo de distancia en `HomeController`.
+- **Pruebas de Integración:** Cada controlador fue probado end-to-end con peticiones HTTP reales: se comprobó que `ApiKeySubscriber` rechaza peticiones sin cabecera `X-API-KEY`, que `JwtAuthenticator` bloquea tokens expirados, y que Doctrine persiste y recupera correctamente las relaciones entre entidades.
+- **Pruebas de Aceptación:** Los 19 controladores y sus rutas fueron validados contra los requisitos funcionales. Los resultados completos están en [TEST_RESULTS.md](TEST_RESULTS.md).
+- **Resolución de Errores:** Depuración con el perfilador de Symfony (`/_profiler`) en `APP_ENV=dev` y consulta de logs en `var/log/dev.log`. Para el entorno de producción se habilitó temporalmente `APP_DEBUG=1` en Render y Railway para diagnosticar problemas de conexión a base de datos (documentados en [TROUBLESHOOTING_RENDER.md](TROUBLESHOOTING_RENDER.md) y [RENDER_DEBUG.md](RENDER_DEBUG.md)).
 
 ---
 
 ### 5. Despliegue (Deployment) y Puesta en Producción
 
-La puesta en producción traslada el proyecto local a un entorno accesible para todos los usuarios.
+La API está preparada para desplegarse en tres plataformas cloud, cada una con su fichero de configuración propio en el repositorio:
 
-- **Preparación del Entorno:** Configuración de servidor web (Apache/Nginx), base de datos PostgreSQL en la nube y variables de entorno de producción (`APP_ENV=prod`, `APP_DEBUG=0`).
-- **Plataformas soportadas:**
-  - **Railway** (recomendado): despliegue automático desde GitHub con `railway.toml`
-  - **Render**: despliegue mediante `render.yaml` con Blueprint
-  - **Fly.io**: configuración en `fly.toml`
-- **Dominio y SSL:** Las plataformas Railway/Render proporcionan subdominios con certificado SSL/TLS automático mediante Let's Encrypt.
-- **Documentación de Despliegue:** Instrucciones detalladas disponibles en [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md), [RAILWAY_SIMPLE.md](RAILWAY_SIMPLE.md) y [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md).
+| Plataforma | Fichero de config | Tipo de BD | Notas |
+|---|---|---|---|
+| **Railway** | `compose.yaml` + `Dockerfile` | PostgreSQL | Recomendado. Deploy automático desde GitHub |
+| **Render** | `render.yaml` | PostgreSQL | Blueprint autodeploy. Ver [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) |
+| **Fly.io** | `fly.toml` | PostgreSQL | Alternativa con más control sobre la instancia |
+
+- **Preparación del entorno de producción:** El `Dockerfile` instala las dependencias de sistema necesarias (`ext-pdo_pgsql`), ejecuta `composer install --no-dev` y lanza el servidor PHP. El script `docker-entrypoint.sh` aplica las migraciones (`doctrine:migrations:migrate`) automáticamente en cada despliegue.
+- **Variables de entorno necesarias en producción:**
+  ```
+  APP_ENV=prod
+  APP_DEBUG=0
+  APP_SECRET=<32 chars aleatorios>
+  APP_API_KEY=test-api-key
+  DATABASE_URL=postgresql://user:pass@host:5432/dbname
+  JWT_SECRET=<clave secreta para firma de tokens>
+  ```
+- **Dominio y SSL:** Railway y Render asignan automáticamente un subdominio `*.railway.app` / `*.onrender.com` con certificado SSL/TLS gestionado por Let's Encrypt, sin configuración adicional.
+- **Datos iniciales:** Tras el primer despliegue, se ejecuta `doctrine:fixtures:load` para cargar los 21 usuarios de prueba geolocalizados en Valencia (definidos en `AppFixtures` y disponibles también en `valencia_users.sql`).
+- **Documentación de despliegue detallada:** [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) · [RAILWAY_SIMPLE.md](RAILWAY_SIMPLE.md) · [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) · [PASOS_RENDER.md](PASOS_RENDER.md)
